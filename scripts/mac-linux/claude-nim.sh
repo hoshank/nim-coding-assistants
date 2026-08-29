@@ -1,7 +1,13 @@
 #!/usr/bin/env bash
 set -e
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do
+  DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+done
+SCRIPT_DIR="$(cd -P "$(dirname "$SOURCE")/../.." && pwd)"
 ENV_FILE="$SCRIPT_DIR/.env"
 PID_FILE="$SCRIPT_DIR/.proxy.pid"
 LOG_FILE="$SCRIPT_DIR/.proxy.log"
