@@ -1,0 +1,47 @@
+{
+  "recommended_default": "meta/llama-3.3-70b-instruct",
+  "models": [
+    {
+      "id": "meta/llama-3.3-70b-instruct",
+      "name": "Llama 3.3 70B Instruct",
+      "provider": "Meta",
+      "supports_tools": true,
+      "recommended_for": "General coding, agentic tool use, refactoring"
+    },
+    {
+      "id": "nvidia/nemotron-3-super-120b-a12b",
+      "name": "Nemotron 3 Super 120B",
+      "provider": "NVIDIA",
+      "supports_tools": true,
+      "recommended_for": "Complex reasoning, synthetic planning"
+    },
+    {
+      "id": "qwen/qwen2.5-coder-32b-instruct",
+      "name": "Qwen 2.5 Coder 32B Instruct",
+      "provider": "Qwen",
+      "supports_tools": true,
+      "recommended_for": "Fast coding, multi-language syntax"
+    },
+    {
+      "id": "mistralai/mistral-large-2-instruct",
+      "name": "Mistral Large 2 Instruct",
+      "provider": "Mistral AI",
+      "supports_tools": true,
+      "recommended_for": "Multilingual, tool use"
+    },
+    {
+      "id": "deepseek-ai/deepseek-r1",
+      "name": "DeepSeek R1",
+      "provider": "DeepSeek",
+      "supports_tools": false,
+      "recommended_for": "Deep math and algorithmic reasoning"
+    },
+    {
+      "id": "meta/llama-3.1-405b-instruct",
+      "name": "Llama 3.1 405B Instruct",
+      "provider": "Meta",
+      "supports_tools": true,
+      "recommended_for": "Large-scale reasoning tasks"
+    }
+  ]
+}

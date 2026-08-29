@@ -1,0 +1,23 @@
+# Environment & Secrets
+.env
+*.env.local
+
+# Virtual Environment
+.venv/
+venv/
+ENV/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Proxy runtime files
+.proxy.pid
+.proxy.log
+litellm.log
+
+# OS artifacts
+.DS_Store
+Thumbs.db

@@ -1,0 +1,8 @@
+# Example ~/.codex/config.toml (Mac/Linux) or %USERPROFILE%\.codex\config.toml (Windows)
+# Place this in your .codex directory to configure Codex CLI with NVIDIA NIM
+
+model = "meta/llama-3.3-70b-instruct"
+
+[openai]
+base_url = "https://integrate.api.nvidia.com/v1"
+api_key = "nvapi-your-key-here"
