@@ -29,7 +29,7 @@ if [ -f "$ENV_FILE" ]; then
   source "$ENV_FILE"
 fi
 
-DEFAULT_MODEL="meta/llama-3.3-70b-instruct"
+DEFAULT_MODEL="nvidia/nemotron-3-ultra-550b-a55b"
 PORT="${NIM_PROXY_PORT:-8000}"
 MODEL="${NIM_MODEL:-$DEFAULT_MODEL}"
 

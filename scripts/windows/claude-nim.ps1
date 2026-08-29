@@ -23,7 +23,7 @@ if (Test-Path $EnvFile) {
     }
 }
 
-$DefaultModel = if ($EnvMap["NIM_MODEL"]) { $EnvMap["NIM_MODEL"] } else { "meta/llama-3.3-70b-instruct" }
+$DefaultModel = if ($EnvMap["NIM_MODEL"]) { $EnvMap["NIM_MODEL"] } else { "nvidia/nemotron-3-ultra-550b-a55b" }
 $Port = if ($EnvMap["NIM_PROXY_PORT"]) { $EnvMap["NIM_PROXY_PORT"] } else { "8000" }
 $Model = $DefaultModel
 $ApiKey = if ($env:NVIDIA_API_KEY) { $env:NVIDIA_API_KEY } else { $EnvMap["NVIDIA_API_KEY"] }

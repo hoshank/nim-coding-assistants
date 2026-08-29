@@ -16,7 +16,7 @@ if [ -f "$ENV_FILE" ]; then
   source "$ENV_FILE"
 fi
 
-DEFAULT_MODEL="meta/llama-3.3-70b-instruct"
+DEFAULT_MODEL="nvidia/nemotron-3-ultra-550b-a55b"
 MODEL="${NIM_MODEL:-$DEFAULT_MODEL}"
 BASE_URL="${NIM_BASE_URL:-https://integrate.api.nvidia.com/v1}"
 

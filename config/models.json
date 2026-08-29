@@ -1,47 +1,70 @@
 {
-  "recommended_default": "meta/llama-3.3-70b-instruct",
+  "recommended_default": "nvidia/nemotron-3-ultra-550b-a55b",
   "models": [
     {
-      "id": "meta/llama-3.3-70b-instruct",
-      "name": "Llama 3.3 70B Instruct",
-      "provider": "Meta",
+      "id": "nvidia/nemotron-3-ultra-550b-a55b",
+      "name": "NVIDIA Nemotron 3 Ultra 550B",
+      "provider": "NVIDIA",
       "supports_tools": true,
-      "recommended_for": "General coding, agentic tool use, refactoring"
+      "max_tokens": 1048576,
+      "max_output_tokens": 32768,
+      "recommended_for": "Default - Massive scale reasoning, coding, and architecture"
     },
     {
       "id": "nvidia/nemotron-3-super-120b-a12b",
-      "name": "Nemotron 3 Super 120B",
+      "name": "NVIDIA Nemotron 3 Super 120B",
       "provider": "NVIDIA",
       "supports_tools": true,
-      "recommended_for": "Complex reasoning, synthetic planning"
+      "max_tokens": 1048576,
+      "max_output_tokens": 32768,
+      "recommended_for": "Fast complex reasoning, agentic tool use, planning"
     },
     {
-      "id": "qwen/qwen2.5-coder-32b-instruct",
-      "name": "Qwen 2.5 Coder 32B Instruct",
-      "provider": "Qwen",
-      "supports_tools": true,
-      "recommended_for": "Fast coding, multi-language syntax"
-    },
-    {
-      "id": "mistralai/mistral-large-2-instruct",
-      "name": "Mistral Large 2 Instruct",
-      "provider": "Mistral AI",
-      "supports_tools": true,
-      "recommended_for": "Multilingual, tool use"
-    },
-    {
-      "id": "deepseek-ai/deepseek-r1",
-      "name": "DeepSeek R1",
+      "id": "deepseek-ai/deepseek-v4-pro",
+      "name": "DeepSeek V4 Pro",
       "provider": "DeepSeek",
-      "supports_tools": false,
-      "recommended_for": "Deep math and algorithmic reasoning"
+      "supports_tools": true,
+      "max_tokens": 1048500,
+      "max_output_tokens": 32768,
+      "recommended_for": "High performance coding and refactoring"
     },
     {
-      "id": "meta/llama-3.1-405b-instruct",
-      "name": "Llama 3.1 405B Instruct",
-      "provider": "Meta",
+      "id": "deepseek-ai/deepseek-v4-flash-0731",
+      "name": "DeepSeek V4 Flash (0731)",
+      "provider": "DeepSeek",
       "supports_tools": true,
-      "recommended_for": "Large-scale reasoning tasks"
+      "max_tokens": 1048576,
+      "max_output_tokens": 32768,
+      "recommended_for": "Low latency fast code completions"
+    },
+    {
+      "id": "minimaxai/minimax-m3",
+      "name": "MiniMax M3 (Vision)",
+      "provider": "MiniMax",
+      "supports_tools": true,
+      "supports_images": true,
+      "max_tokens": 524288,
+      "max_output_tokens": 32768,
+      "recommended_for": "Multimodal vision & UI understanding"
+    },
+    {
+      "id": "z-ai/glm-5.2",
+      "name": "GLM 5.2",
+      "provider": "Z-AI",
+      "supports_tools": true,
+      "max_tokens": 1048576,
+      "max_output_tokens": 32768,
+      "recommended_for": "General coding and reasoning"
+    },
+    {
+      "id": "thinkingmachines/inkling",
+      "name": "Thinking Machines Inkling",
+      "provider": "Thinking Machines",
+      "supports_tools": true,
+      "supports_images": true,
+      "max_tokens": 131072,
+      "max_output_tokens": 32768,
+      "recommended_for": "Interleaved reasoning, vision, and tool calling"
     }
   ]
 }

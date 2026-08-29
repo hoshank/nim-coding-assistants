@@ -65,23 +65,36 @@ async def health():
 @app.get("/v1/models")
 async def list_models():
     env = get_env()
-    model = os.environ.get("NIM_MODEL") or env.get("NIM_MODEL") or "meta/llama-3.3-70b-instruct"
-    return {
-        "data": [
-            {"id": model, "object": "model"},
-            {"id": f"{model}[1m]", "object": "model"},
-            {"id": "meta/llama-3.3-70b-instruct", "object": "model"},
+    model = os.environ.get("NIM_MODEL") or env.get("NIM_MODEL") or "nvidia/nemotron-3-ultra-550b-a55b"
+    models_file = Path(__file__).parent / "config" / "models.json"
+    available = []
+    if models_file.exists():
+        try:
+            with open(models_file, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                for m in data.get("models", []):
+                    available.append({"id": m["id"], "object": "model"})
+                    available.append({"id": f"{m['id']}[1m]", "object": "model"})
+        except Exception:
+            pass
+    if not available:
+        available = [
+            {"id": "nvidia/nemotron-3-ultra-550b-a55b", "object": "model"},
             {"id": "nvidia/nemotron-3-super-120b-a12b", "object": "model"},
-            {"id": "qwen/qwen2.5-coder-32b-instruct", "object": "model"}
+            {"id": "deepseek-ai/deepseek-v4-pro", "object": "model"},
+            {"id": "deepseek-ai/deepseek-v4-flash-0731", "object": "model"},
+            {"id": "minimaxai/minimax-m3", "object": "model"},
+            {"id": "z-ai/glm-5.2", "object": "model"},
+            {"id": "thinkingmachines/inkling", "object": "model"}
         ]
-    }
+    return {"data": available}
 
 @app.post("/v1/messages")
 async def messages_endpoint(request: Request):
     env = get_env()
     api_key = os.environ.get("NVIDIA_API_KEY") or env.get("NVIDIA_API_KEY")
     api_base = os.environ.get("NIM_BASE_URL") or env.get("NIM_BASE_URL") or "https://integrate.api.nvidia.com/v1"
-    default_model = os.environ.get("NIM_MODEL") or env.get("NIM_MODEL") or "meta/llama-3.3-70b-instruct"
+    default_model = os.environ.get("NIM_MODEL") or env.get("NIM_MODEL") or "nvidia/nemotron-3-ultra-550b-a55b"
 
     if not api_key:
         return JSONResponse(
