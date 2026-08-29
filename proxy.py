@@ -33,7 +33,7 @@ def get_env() -> Dict[str, str]:
         Path.cwd() / ".env",
         Path(__file__).parent / ".env",
         Path.home() / ".claude" / "nim" / ".env",
-        Path.home() / ".nim-assistant-bridge" / ".env",
+        Path.home() / ".nim-coding-assistants" / ".env",
     ]
     
     for p in potential_paths:

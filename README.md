@@ -1,4 +1,4 @@
-# 🚀 NVIDIA NIM Assistant Bridge
+# 🚀 NIM Coding Assistants (Claude Code, Codex CLI & Zed Editor)
 
 [![macOS](https://img.shields.io/badge/macOS-supported-brightgreen?logo=apple)]()
 [![Linux](https://img.shields.io/badge/Linux-supported-brightgreen?logo=linux)]()
@@ -63,8 +63,8 @@ graph TD
 
 #### 1. Clone & Install
 ```bash
-git clone <your-repo-url> nim-assistant-bridge
-cd nim-assistant-bridge
+git clone https://github.com/hoshank/nim-coding-assistants.git
+cd nim-coding-assistants
 
 # Run installer (sets up virtualenv & global CLI commands)
 ./scripts/mac-linux/install.sh
@@ -90,8 +90,8 @@ codex-nim
 Open PowerShell or Command Prompt:
 
 ```powershell
-git clone <your-repo-url> nim-assistant-bridge
-cd nim-assistant-bridge
+git clone https://github.com/hoshank/nim-coding-assistants.git
+cd nim-coding-assistants
 
 # Run PowerShell installer
 powershell -ExecutionPolicy Bypass -File .\scripts\windows\install.ps1
