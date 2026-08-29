@@ -1,61 +1,59 @@
-# 🚀 NVIDIA NIM Assistant Bridge (Claude Code, Codex CLI & Zed Editor)
+# 🚀 NVIDIA NIM Assistant Bridge
 
-A lightweight, cross-platform bridge and launcher toolkit to run **Claude Code**, **Codex CLI**, and **Zed Editor** with **NVIDIA NIM** (NVIDIA Cloud API Catalog and self-hosted NIM inference microservices).
+[![macOS](https://img.shields.io/badge/macOS-supported-brightgreen?logo=apple)]()
+[![Linux](https://img.shields.io/badge/Linux-supported-brightgreen?logo=linux)]()
+[![Windows](https://img.shields.io/badge/Windows-supported-brightgreen?logo=windows)]()
+[![NVIDIA NIM](https://img.shields.io/badge/NVIDIA-NIM%20Catalog-76B900?logo=nvidia)]()
 
-Supports **macOS**, **Linux**, and **Windows**.
+A lightweight, cross-platform bridge and launcher toolkit to run **Claude Code**, **Codex CLI**, and **Zed Editor** with **NVIDIA NIM** (NVIDIA Cloud API Catalog and self-hosted NIM microservices).
 
 ---
 
-## 📌 Features & Architecture
+## 📌 Architecture Overview
 
-- **Claude Code**: Natively speaks the Anthropic `/v1/messages` protocol. The included Python proxy translates Anthropic streaming SSE & tool-calling requests into NVIDIA NIM OpenAI-compatible format in real-time, while stripping Anthropic-specific internal parameters (`output_config`, `context_management`).
-- **Codex CLI**: Connects directly to NVIDIA NIM via OpenAI-compatible endpoints with auto-configured environment variables.
-- **Zed Editor**: Ready-to-use `settings.json` configuration for Zed's Assistant panel with custom model profiles, tool calling, and token limits.
+```mermaid
+graph TD
+    subgraph Clients["AI Coding Clients"]
+        CC["Claude Code CLI (Anthropic Format)"]
+        CX["Codex CLI (OpenAI Format)"]
+        ZD["Zed Editor (OpenAI Compatible)"]
+    end
+
+    subgraph Bridge["Local Bridge (proxy.py)"]
+        PRX["FastAPI Streaming Proxy (127.0.0.1:8000)<br/>• Realtime Anthropic ↔ OpenAI Translation<br/>• Parameter Sanitization<br/>• Tool-Calling Bridge<br/>• Model Alias Mapping"]
+    end
+
+    subgraph NIM["NVIDIA NIM Backend"]
+        CAT["NVIDIA Cloud API (integrate.api.nvidia.com)"]
+        SH["Self-Hosted Local/K8s NIM Container"]
+    end
+
+    CC -->|Anthropic /v1/messages| PRX
+    PRX -->|OpenAI /v1/chat/completions| CAT
+    PRX -.->|OpenAI /v1/chat/completions| SH
+
+    CX -->|Direct OpenAI Format| CAT
+    CX -.->|Direct OpenAI Format| SH
+
+    ZD -->|Direct OpenAI Format| CAT
+    ZD -.->|Direct OpenAI Format| SH
+```
 
 ---
 
 ## 🤖 Active Available Models
 
-| Model ID | Provider | Tool Calling | Vision | Max Tokens | Description |
+| Model ID | Provider | Tool Calling | Vision | Context Window | Best Used For |
 | :--- | :---: | :---: | :---: | :---: | :--- |
-| `nvidia/nemotron-3-ultra-550b-a55b` | NVIDIA | ✅ Yes | ❌ | 1,048,576 | **Recommended Default** — Flagship Ultra 550B model |
-| `nvidia/nemotron-3-super-120b-a12b` | NVIDIA | ✅ Yes | ❌ | 1,048,576 | High-speed, complex reasoning & agentic planning |
-| `deepseek-ai/deepseek-v4-pro` | DeepSeek | ✅ Yes | ❌ | 1,048,500 | High-performance coding and refactoring |
-| `deepseek-ai/deepseek-v4-flash-0731`| DeepSeek | ✅ Yes | ❌ | 1,048,576 | Low-latency completions & code generation |
-| `minimaxai/minimax-m3` | MiniMax | ✅ Yes | ✅ Yes | 524,288 | Multimodal vision & UI understanding |
+| **`nvidia/nemotron-3-ultra-550b-a55b`** | NVIDIA | ✅ Yes | ❌ | 1,048,576 | **Recommended Default** — Ultra 550B flagship |
+| `nvidia/nemotron-3-super-120b-a12b` | NVIDIA | ✅ Yes | ❌ | 1,048,576 | High-speed reasoning & agentic planning |
+| `deepseek-ai/deepseek-v4-pro` | DeepSeek | ✅ Yes | ❌ | 1,048,500 | Advanced coding & refactoring |
+| `deepseek-ai/deepseek-v4-flash-0731`| DeepSeek | ✅ Yes | ❌ | 1,048,576 | Low-latency completions |
+| `minimaxai/minimax-m3` | MiniMax | ✅ Yes | ✅ Yes | 524,288 | Multimodal vision & UI tasks |
 | `z-ai/glm-5.2` | Z-AI | ✅ Yes | ❌ | 1,048,576 | General coding and reasoning |
-| `thinkingmachines/inkling` | Thinking Machines | ✅ Yes | ✅ Yes | 131,072 | Interleaved reasoning, vision, and tool calling |
+| `thinkingmachines/inkling` | Thinking Machines | ✅ Yes | ✅ Yes | 131,072 | Interleaved reasoning, vision & tools |
 
-> 💡 *Note: To add or update models later, simply edit `config/models.json` and `config/zed_settings.example.json`.*
-
----
-
-## 📁 Repository Structure
-
-```text
-nim-assistant-bridge/
-├── proxy.py                      # Fast FastAPI Anthropic <-> NIM translator
-├── requirements.txt              # Python dependencies
-├── .env.example                  # Configuration template
-├── config/
-│   ├── models.json               # Active available models list
-│   ├── zed_settings.example.json # Zed Editor configuration template
-│   └── codex_config.example.toml # Optional ~/.codex/config.toml template
-└── scripts/
-    ├── mac-linux/
-    │   ├── install.sh            # 1-click installer for macOS / Linux
-    │   ├── setup-zed.sh          # Auto-configures ~/.config/zed/settings.json
-    │   ├── claude-nim.sh         # Claude Code launcher
-    │   └── codex-nim.sh          # Codex CLI launcher
-    └── windows/
-        ├── install.ps1           # 1-click installer for Windows (PowerShell)
-        ├── install.bat           # 1-click installer for Windows (CMD)
-        ├── setup-zed.ps1         # Auto-configures %APPDATA%\Zed\settings.json
-        ├── claude-nim.ps1        # Claude Code launcher (PowerShell)
-        ├── codex-nim.ps1         # Codex CLI launcher (PowerShell)
-        ├── claude-nim.bat        # Claude Code wrapper for cmd.exe
-        └── codex-nim.bat         # Codex CLI wrapper for cmd.exe
-```
+> 💡 *Need to add or modify models later? Check the [Adding Models Guide](docs/ADDING_MODELS.md).*
 
 ---
 
@@ -68,16 +66,16 @@ nim-assistant-bridge/
 git clone <your-repo-url> nim-assistant-bridge
 cd nim-assistant-bridge
 
-# Run installer (sets up virtualenv & global commands)
+# Run installer (sets up virtualenv & global CLI commands)
 ./scripts/mac-linux/install.sh
 ```
 
-#### 2. Launch Assistants
+#### 2. Launch
 ```bash
-# Launch Claude Code with NVIDIA NIM (default: nemotron-3-ultra-550b-a55b)
+# Launch Claude Code (uses Nemotron 3 Ultra 550B default)
 claude-nim
 
-# Launch Codex CLI with NVIDIA NIM
+# Launch Codex CLI
 codex-nim
 
 # Configure Zed Editor automatically
@@ -98,16 +96,16 @@ cd nim-assistant-bridge
 # Run PowerShell installer
 powershell -ExecutionPolicy Bypass -File .\scripts\windows\install.ps1
 ```
-*(Or in `cmd.exe`: run `.\scripts\windows\install.bat`)*
+*(Or in `cmd.exe`: double-click / run `.\scripts\windows\install.bat`)*
 
-#### 2. Launch Assistants
+#### 2. Launch
 Open a new terminal window:
 
 ```powershell
-# Launch Claude Code with NVIDIA NIM
+# Launch Claude Code
 claude-nim
 
-# Launch Codex CLI with NVIDIA NIM
+# Launch Codex CLI
 codex-nim
 
 # Configure Zed Editor automatically
@@ -116,44 +114,46 @@ powershell -ExecutionPolicy Bypass -File .\scripts\windows\setup-zed.ps1
 
 ---
 
-## 🧩 Setting Up Zed Editor Manually
+## 📖 In-Depth Guides
 
-If you prefer to configure Zed manually:
-
-1. Open `~/.config/zed/settings.json` (Mac/Linux) or `%APPDATA%\Zed\settings.json` (Windows).
-2. Copy the contents of [`config/zed_settings.example.json`](config/zed_settings.example.json) into your settings file.
-3. Open Zed, press `Cmd+Shift+P` / `Ctrl+Shift+P`, select **`zed: set api key`**, select provider **`Nvidia`**, and enter your API key (`nvapi-...`).
+- 🧩 **[Zed Editor Setup Guide](docs/ZED_SETUP.md)**: Full instructions for setting up Zed's Assistant panel, inline edit predictions, and setting your API key via `Cmd+Shift+P`.
+- 🤖 **[Claude Code Integration Guide](docs/CLAUDE_CODE.md)**: Details on the Anthropic-to-OpenAI translation layer, parameter stripping (`output_config`, `context_management`), and subagent handling.
+- 💻 **[Codex CLI Integration Guide](docs/CODEX_CLI.md)**: How to configure Codex CLI via `codex-nim` or `~/.codex/config.toml`.
+- ➕ **[Adding & Updating Models Guide](docs/ADDING_MODELS.md)**: Step-by-step instructions to add newly released NIM models.
 
 ---
 
-## ⚙️ Advanced CLI Flags
+## ⚙️ CLI Cheat Sheet
 
 ### Claude Code (`claude-nim`)
 
 ```bash
-# Switch to another active model
+# Launch with a specific active model
 claude-nim --model nvidia/nemotron-3-super-120b-a12b
 claude-nim --model deepseek-ai/deepseek-v4-pro
 claude-nim --model minimaxai/minimax-m3
 
-# Check proxy background status or view logs
+# Run a non-interactive one-off prompt
+claude-nim -p "Review this PR diff"
+
+# Change local proxy port
+claude-nim --port 8080
+
+# Check background proxy status & logs
 claude-nim --status
 claude-nim --logs
 
-# Stop the proxy daemon
+# Stop the background proxy daemon
 claude-nim --stop
-
-# Pass standard Claude Code flags directly
-claude-nim -p "Review this codebase"
 ```
 
 ### Codex CLI (`codex-nim`)
 
 ```bash
-# Use a specific model
+# Launch with a specific model
 codex-nim --model nvidia/nemotron-3-ultra-550b-a55b
 
-# Point to a custom or self-hosted NIM endpoint
+# Point to custom or self-hosted NIM endpoint
 codex-nim --url http://localhost:8000/v1
 ```
 
@@ -161,7 +161,7 @@ codex-nim --url http://localhost:8000/v1
 
 ## 🌐 Self-Hosted NIM Deployment
 
-If running your own local or Kubernetes NIM container (e.g. `http://192.168.1.100:8000/v1`), configure `.env`:
+If you are running your own local or Kubernetes NIM container (e.g. at `http://192.168.1.100:8000/v1`), configure `.env`:
 
 ```bash
 NIM_BASE_URL="http://192.168.1.100:8000/v1"
@@ -171,9 +171,44 @@ NIM_MODEL="nvidia/nemotron-3-ultra-550b-a55b"
 
 ---
 
-## 🛠️ Requirements
+## ❓ Troubleshooting & FAQs
+
+<details>
+<summary><b>1. Port 8000 is already in use</b></summary>
+
+Specify a different port using the `--port` flag:
+```bash
+claude-nim --port 8088
+```
+Or update `NIM_PROXY_PORT=8088` in `.env`.
+</details>
+
+<details>
+<summary><b>2. Claude Code returns 400 Validation Error on unknown parameters</b></summary>
+
+Claude Code sends Anthropic-specific internal parameters (`output_config`, `context_management`). The bridge proxy automatically strips these parameters before forwarding to NVIDIA NIM. Ensure your proxy is running via `claude-nim`.
+</details>
+
+<details>
+<summary><b>3. Claude Code returns 404 Model Not Found for Haiku or Sonnet</b></summary>
+
+Claude Code internally queries aliases (`haiku`, `sonnet`, `opus`) for background tasks. The `claude-nim` launcher maps all alias variables (`ANTHROPIC_DEFAULT_HAIKU_MODEL`, etc.) to your selected NIM model to prevent 404 errors.
+</details>
+
+<details>
+<summary><b>4. Windows: PowerShell script execution disabled</b></summary>
+
+If PowerShell displays an execution policy error, run with `-ExecutionPolicy Bypass`:
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\windows\install.ps1
+```
+</details>
+
+---
+
+## 🛠️ Prerequisites
 - Python 3.10+
 - [Claude Code CLI](https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview) (`npm install -g @anthropic-ai/claude-code`)
 - [Codex CLI](https://github.com/openai/codex) (optional)
 - [Zed Editor](https://zed.dev/) (optional)
-- An NVIDIA API Key from [build.nvidia.com](https://build.nvidia.com/)
+- NVIDIA API Key from [build.nvidia.com](https://build.nvidia.com/)
