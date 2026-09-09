@@ -200,12 +200,15 @@ fi
 # Export Claude Code environment variables exactly as in NVIDIA documentation
 export ANTHROPIC_BASE_URL="http://127.0.0.1:${PORT}"
 export ANTHROPIC_API_KEY="not-used"
+export ANTHROPIC_MODEL="${MODEL}"
+export CLAUDE_MODEL="${MODEL}"
 export MODEL_NAME="${MODEL}"
 export ANTHROPIC_CUSTOM_MODEL_OPTION="${MODEL}"
 export ANTHROPIC_DEFAULT_HAIKU_MODEL="${MODEL}"
 export ANTHROPIC_DEFAULT_SONNET_MODEL="${MODEL}"
 export ANTHROPIC_DEFAULT_OPUS_MODEL="${MODEL}"
 export CLAUDE_CODE_SUBAGENT_MODEL="${MODEL}"
+
 
 echo "=========================================================="
 echo " Launching Claude Code with NVIDIA NIM"

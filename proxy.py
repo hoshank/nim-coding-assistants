@@ -138,6 +138,8 @@ async def messages_endpoint(request: Request):
     else:
         model_to_use = requested_model
 
+    print(f"[NIM Proxy] Received request for '{requested_model}' -> forwarding to NIM model '{model_to_use}' at {api_base}", flush=True)
+
     stream = body.get("stream", False)
     max_tokens = body.get("max_tokens", 4096)
     messages = body.get("messages", [])
@@ -153,6 +155,7 @@ async def messages_endpoint(request: Request):
         res = await anthropic_handler.anthropic_messages(
             model=model_to_use,
             messages=messages,
+
             max_tokens=max_tokens,
             system=system,
             tools=tools,

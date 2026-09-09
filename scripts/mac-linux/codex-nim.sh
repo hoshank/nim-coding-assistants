@@ -93,15 +93,40 @@ NIM_PROXY_PORT="${NIM_PROXY_PORT:-8000}"
 EOF
 chmod 600 "$ENV_FILE" 2>/dev/null || true
 
+export NVIDIA_API_KEY="$NVIDIA_API_KEY"
 export OPENAI_BASE_URL="$BASE_URL"
 export OPENAI_API_KEY="$NVIDIA_API_KEY"
 export CODEX_MODEL="$MODEL"
+
+# Ensure ~/.codex/nim.config.toml is maintained
+mkdir -p "$HOME/.codex"
+cat << EOF > "$HOME/.codex/nim.config.toml"
+model = "$MODEL"
+model_provider = "nvidia_nim"
+
+[model_providers.nvidia_nim]
+name = "NVIDIA NIM"
+base_url = "$BASE_URL"
+env_key = "NVIDIA_API_KEY"
+wire_api = "responses"
+EOF
+
+NIM_CONFIG_ARGS=(
+  -c "model_provider=\"nvidia_nim\""
+  -c "model=\"$MODEL\""
+  -c "model_providers.nvidia_nim.name=\"NVIDIA NIM\""
+  -c "model_providers.nvidia_nim.base_url=\"$BASE_URL\""
+  -c "model_providers.nvidia_nim.env_key=\"NVIDIA_API_KEY\""
+  -c "model_providers.nvidia_nim.wire_api=\"responses\""
+)
 
 echo "=========================================================="
 echo " Launching Codex CLI with NVIDIA NIM"
 echo " Model:     ${MODEL}"
 echo " Endpoint:  ${BASE_URL}"
+echo " Provider:  nvidia_nim"
 echo " Docs:      https://docs.nvidia.com/nim/large-language-models/latest/ai-assistant-integrations/codex-cli.html"
 echo "=========================================================="
 
-exec codex "${CODEX_ARGS[@]}"
+exec codex "${NIM_CONFIG_ARGS[@]}" "${CODEX_ARGS[@]}"
+

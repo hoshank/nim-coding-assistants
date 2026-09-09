@@ -7,6 +7,7 @@ $ScriptDir = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $EnvFile = Join-Path $ScriptDir ".env"
 $PidFile = Join-Path $ScriptDir ".proxy.pid"
 $LogFile = Join-Path $ScriptDir ".proxy.log"
+$ErrLogFile = Join-Path $ScriptDir ".proxy.err.log"
 $VenvPython = Join-Path $ScriptDir ".venv\Scripts\python.exe"
 
 $PythonBin = if (Test-Path $VenvPython) { $VenvPython } else { "python" }
@@ -44,6 +45,7 @@ while ($i -lt $args.Count) {
             Write-Host "  --key <key>     Set NVIDIA API Key"
             Write-Host "  --stop          Stop background proxy"
             Write-Host "  --status        Check proxy status"
+            Write-Host "  --logs          View background proxy logs"
             exit 0
         }
         "-h" {
@@ -64,26 +66,39 @@ while ($i -lt $args.Count) {
         }
         "--status" {
             if (Test-Path $PidFile) {
-                $pidVal = Get-Content $PidFile
-                $proc = Get-Process -Id $pidVal -ErrorAction SilentlyContinue
-                if ($proc) {
+                $pidVal = (Get-Content $PidFile -ErrorAction SilentlyContinue)
+                if ($pidVal -and ($proc = Get-Process -Id $pidVal -ErrorAction SilentlyContinue)) {
                     Write-Host "NIM Proxy is RUNNING (PID: $pidVal, Port: $Port)" -ForegroundColor Green
-                } else {
-                    Write-Host "NIM Proxy is STOPPED" -ForegroundColor Yellow
+                    exit 0
                 }
-            } else {
-                Write-Host "NIM Proxy is STOPPED" -ForegroundColor Yellow
             }
+            Write-Host "NIM Proxy is STOPPED" -ForegroundColor Yellow
             exit 0
         }
         "--stop" {
             if (Test-Path $PidFile) {
-                $pidVal = Get-Content $PidFile
-                Stop-Process -Id $pidVal -ErrorAction SilentlyContinue
+                $pidVal = (Get-Content $PidFile -ErrorAction SilentlyContinue)
+                if ($pidVal) {
+                    Stop-Process -Id $pidVal -ErrorAction SilentlyContinue
+                }
                 Remove-Item $PidFile -ErrorAction SilentlyContinue
-                Write-Host "Stopped NIM Proxy (PID: $pidVal)" -ForegroundColor Green
+                Write-Host "Stopped NIM Proxy$(if ($pidVal) { " (PID: $pidVal)" })" -ForegroundColor Green
             } else {
                 Write-Host "No running proxy found." -ForegroundColor Yellow
+            }
+            exit 0
+        }
+        "--logs" {
+            if (Test-Path $LogFile) {
+                Write-Host "=== Output Log ($LogFile) ===" -ForegroundColor Cyan
+                Get-Content $LogFile -Tail 50
+            }
+            if (Test-Path $ErrLogFile) {
+                Write-Host "=== Error Log ($ErrLogFile) ===" -ForegroundColor Cyan
+                Get-Content $ErrLogFile -Tail 50
+            }
+            if (-not (Test-Path $LogFile) -and -not (Test-Path $ErrLogFile)) {
+                Write-Host "No log file found." -ForegroundColor Yellow
             }
             exit 0
         }
@@ -132,10 +147,18 @@ function Test-ProxyRunning {
 
 # Start proxy if not active
 if (-not (Test-ProxyRunning)) {
+    $pyWorks = try { & $PythonBin -c "import sys" 2>$null; $LASTEXITCODE -eq 0 } catch { $false }
+    if (-not $pyWorks) {
+        Write-Error "Python is not installed or not working properly. Please install Python 3.10+ (e.g., 'winget install Python.Python.3.12') and run install.ps1 to set up the environment."
+        exit 1
+    }
+
     Write-Host "Starting NIM background proxy on port $Port..." -ForegroundColor Cyan
     $ProxyScript = Join-Path $ScriptDir "proxy.py"
-    $proc = Start-Process -FilePath $PythonBin -ArgumentList "`"$ProxyScript`" --port $Port" -WindowStyle Hidden -PassThru -RedirectStandardOutput $LogFile -RedirectStandardError $LogFile
-    $proc.Id | Set-Content $PidFile
+    $proc = Start-Process -FilePath $PythonBin -ArgumentList "-u `"$ProxyScript`" --port $Port" -WindowStyle Hidden -PassThru -RedirectStandardOutput $LogFile -RedirectStandardError $ErrLogFile
+    if ($proc -and $proc.Id) {
+        $proc.Id | Set-Content $PidFile
+    }
 
     $ready = $false
     for ($attempt = 0; $attempt -lt 25; $attempt++) {
@@ -146,19 +169,22 @@ if (-not (Test-ProxyRunning)) {
         }
     }
     if (-not $ready) {
-        Write-Warning "Proxy startup took longer than expected. Check logs at $LogFile"
+        Write-Warning "Proxy startup took longer than expected. Check logs at $LogFile or $ErrLogFile"
     }
 }
 
 # Export environment variables for Claude Code
 $env:ANTHROPIC_BASE_URL = "http://127.0.0.1:$Port"
 $env:ANTHROPIC_API_KEY = "not-used"
+$env:ANTHROPIC_MODEL = $Model
+$env:CLAUDE_MODEL = $Model
 $env:MODEL_NAME = $Model
 $env:ANTHROPIC_CUSTOM_MODEL_OPTION = $Model
 $env:ANTHROPIC_DEFAULT_HAIKU_MODEL = $Model
 $env:ANTHROPIC_DEFAULT_SONNET_MODEL = $Model
 $env:ANTHROPIC_DEFAULT_OPUS_MODEL = $Model
 $env:CLAUDE_CODE_SUBAGENT_MODEL = $Model
+
 
 Write-Host "==========================================================" -ForegroundColor Green
 Write-Host " Launching Claude Code with NVIDIA NIM (Windows)" -ForegroundColor Green

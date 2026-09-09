@@ -13,8 +13,9 @@ Write-Host "==========================================================" -Foregro
 
 # 1. Check Python
 $pythonInstalled = Get-Command python -ErrorAction SilentlyContinue
-if (-not $pythonInstalled) {
-    Write-Error "Python 3 is not found in PATH. Please install Python 3.10+ from python.org or Microsoft Store."
+$pyWorks = if ($pythonInstalled) { try { & python -c "import sys" 2>$null; $LASTEXITCODE -eq 0 } catch { $false } } else { $false }
+if (-not $pyWorks) {
+    Write-Error "Python 3 is not found or not functional (Windows execution alias may be unconfigured). Please install Python 3.10+ (e.g. 'winget install Python.Python.3.12') and restart your terminal."
     exit 1
 }
 

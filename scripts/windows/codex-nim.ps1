@@ -83,14 +83,43 @@ NIM_MODEL="$Model"
 NIM_PROXY_PORT="${env:NIM_PROXY_PORT:-8000}"
 "@ | Set-Content $EnvFile -Encoding UTF8
 
+$env:NVIDIA_API_KEY = $ApiKey
 $env:OPENAI_BASE_URL = $BaseUrl
 $env:OPENAI_API_KEY = $ApiKey
 $env:CODEX_MODEL = $Model
+
+# Ensure nim profile is maintained in ~/.codex/nim.config.toml
+$CodexDir = Join-Path $env:USERPROFILE ".codex"
+if (-not (Test-Path $CodexDir)) {
+    New-Item -ItemType Directory -Path $CodexDir -Force | Out-Null
+}
+$NimProfilePath = Join-Path $CodexDir "nim.config.toml"
+@"
+model = "$Model"
+model_provider = "nvidia_nim"
+
+[model_providers.nvidia_nim]
+name = "NVIDIA NIM"
+base_url = "$BaseUrl"
+env_key = "NVIDIA_API_KEY"
+wire_api = "responses"
+"@ | Set-Content $NimProfilePath -Encoding UTF8
+
+$NimConfigArgs = @(
+    "-c", "model_provider=`"nvidia_nim`"",
+    "-c", "model=`"$Model`"",
+    "-c", "model_providers.nvidia_nim.name=`"NVIDIA NIM`"",
+    "-c", "model_providers.nvidia_nim.base_url=`"$BaseUrl`"",
+    "-c", "model_providers.nvidia_nim.env_key=`"NVIDIA_API_KEY`"",
+    "-c", "model_providers.nvidia_nim.wire_api=`"responses`""
+)
 
 Write-Host "==========================================================" -ForegroundColor Green
 Write-Host " Launching Codex CLI with NVIDIA NIM (Windows)" -ForegroundColor Green
 Write-Host " Model:     $Model"
 Write-Host " Endpoint:  $BaseUrl"
+Write-Host " Provider:  nvidia_nim"
 Write-Host "==========================================================" -ForegroundColor Green
 
-& codex @CodexArgs
+& codex @NimConfigArgs @CodexArgs
+
