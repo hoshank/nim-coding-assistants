@@ -77,3 +77,28 @@ claude-nim --logs
 # Stop the background proxy
 claude-nim --stop
 ```
+
+---
+
+## 🎭 Profiles & Plugin Isolation
+
+Claude Code manages its settings, credentials, MCP servers, and installed plugins within its config directory. By leveraging `--profile <name>`, `claude-nim` points `CLAUDE_CONFIG_DIR` to an isolated profile folder (`~/.claude-profiles/<name>`).
+
+### 1. Pure Vanilla Instance
+To launch a completely clean, plugin-free Claude session:
+```bash
+claude-nim --profile vanilla
+```
+In this session, no plugins or custom extensions are loaded.
+
+### 2. Dedicated Plugin Profiles
+To maintain profiles with specific plugins or MCP integrations:
+```bash
+# Launch a dedicated profile (e.g. dev)
+claude-nim --profile dev
+
+# Inside this session, install plugins as needed:
+# /plugin install <plugin-name>
+```
+All installed plugins and configurations are saved only to `~/.claude-profiles/dev/`, keeping your default and `vanilla` profiles completely untouched.
+

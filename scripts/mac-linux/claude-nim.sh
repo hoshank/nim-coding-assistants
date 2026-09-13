@@ -42,6 +42,7 @@ Usage:
 
 Options:
   --model <name>       Specify the model to use (default: meta/llama-3.3-70b-instruct)
+  --profile <name>     Specify profile name (e.g. vanilla, dev)
   --port <port>        Specify the local proxy port (default: 8000)
   --key <key>          Set or update your NVIDIA API key
   --status             Check the status of the NIM background proxy
@@ -64,11 +65,16 @@ EOF
 
 # Parse custom wrapper flags
 CLAUDE_ARGS=()
+PROFILE=""
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --help|-h)
       show_help
       exit 0
+      ;;
+    --profile)
+      PROFILE="$2"
+      shift 2
       ;;
     --model|-m)
       MODEL="$2"
@@ -83,6 +89,7 @@ while [[ $# -gt 0 ]]; do
       shift 2
       ;;
     --status)
+
       if [ -f "$PID_FILE" ] && kill -0 "$(cat "$PID_FILE")" 2>/dev/null; then
         echo "NIM Proxy is RUNNING (PID: $(cat "$PID_FILE"), Port: $PORT)"
       else
@@ -210,12 +217,25 @@ export ANTHROPIC_DEFAULT_OPUS_MODEL="${MODEL}"
 export CLAUDE_CODE_SUBAGENT_MODEL="${MODEL}"
 
 
+# Profile support (isolated config, history, plugins, and MCP servers)
+if [ -n "$PROFILE" ]; then
+  PROFILE_DIR="$HOME/.claude-profiles/$PROFILE"
+  mkdir -p "$PROFILE_DIR"
+  export CLAUDE_CONFIG_DIR="$PROFILE_DIR"
+fi
+
 echo "=========================================================="
 echo " Launching Claude Code with NVIDIA NIM"
 echo " Model:     ${MODEL}"
+if [ -n "$PROFILE" ]; then
+  echo " Profile:   ${PROFILE} (${PROFILE_DIR})"
+else
+  echo " Profile:   default"
+fi
 echo " Endpoint:  ${NIM_BASE_URL:-https://integrate.api.nvidia.com/v1}"
 echo " Proxy:     http://127.0.0.1:${PORT}"
 echo " Docs:      https://docs.nvidia.com/nim/large-language-models/latest/ai-assistant-integrations/claude-code.html"
 echo "=========================================================="
 
 exec claude "${CLAUDE_ARGS[@]}"
+

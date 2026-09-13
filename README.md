@@ -142,6 +142,10 @@ claude-nim --model nvidia/nemotron-3-super-120b-a12b
 claude-nim --model deepseek-ai/deepseek-v4-pro
 claude-nim --model minimaxai/minimax-m3
 
+# Launch with an isolated profile (e.g. clean vanilla or dedicated plugin environment)
+claude-nim --profile vanilla
+claude-nim --profile dev
+
 # Run a non-interactive one-off prompt
 claude-nim -p "Review this PR diff"
 
@@ -155,6 +159,7 @@ claude-nim --logs
 # Stop the background proxy daemon
 claude-nim --stop
 ```
+
 
 ### Codex CLI (`codex-nim`)
 

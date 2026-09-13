@@ -41,6 +41,7 @@ while ($i -lt $args.Count) {
             Write-Host "Usage: claude-nim [options] [claude options...]"
             Write-Host "Options:"
             Write-Host "  --model <name>  Specify the model (default: meta/llama-3.3-70b-instruct)"
+            Write-Host "  --profile <name> Specify profile name (e.g. vanilla, dev)"
             Write-Host "  --port <port>   Specify proxy port (default: 8000)"
             Write-Host "  --key <key>     Set NVIDIA API Key"
             Write-Host "  --stop          Stop background proxy"
@@ -51,6 +52,9 @@ while ($i -lt $args.Count) {
         "-h" {
             Write-Host "Claude Code with NVIDIA NIM Bridge (Windows)" -ForegroundColor Cyan
             exit 0
+        }
+        "--profile" {
+            $i++; $Profile = $args[$i]
         }
         "--model" {
             $i++; $Model = $args[$i]
@@ -185,12 +189,26 @@ $env:ANTHROPIC_DEFAULT_SONNET_MODEL = $Model
 $env:ANTHROPIC_DEFAULT_OPUS_MODEL = $Model
 $env:CLAUDE_CODE_SUBAGENT_MODEL = $Model
 
+# Profile support (isolated config, history, plugins, and MCP servers)
+if ($Profile) {
+    $ProfileDir = Join-Path $env:USERPROFILE ".claude-profiles\$Profile"
+    if (-not (Test-Path $ProfileDir)) {
+        New-Item -ItemType Directory -Path $ProfileDir -Force | Out-Null
+    }
+    $env:CLAUDE_CONFIG_DIR = $ProfileDir
+}
 
 Write-Host "==========================================================" -ForegroundColor Green
 Write-Host " Launching Claude Code with NVIDIA NIM (Windows)" -ForegroundColor Green
 Write-Host " Model:     $Model"
+if ($Profile) {
+    Write-Host " Profile:   $Profile ($ProfileDir)" -ForegroundColor Cyan
+} else {
+    Write-Host " Profile:   default"
+}
 Write-Host " Endpoint:  $BaseUrl"
 Write-Host " Proxy:     http://127.0.0.1:$Port"
 Write-Host "==========================================================" -ForegroundColor Green
 
 & claude @ClaudeArgs
+
