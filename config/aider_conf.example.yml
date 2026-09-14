@@ -1,0 +1,35 @@
+# ==============================================================================
+# Sample Aider Configuration for NVIDIA NIM
+# Copy to ~/.aider.conf.yml for user-wide settings,
+# or to .aider.conf.yml in your repo root for project-specific settings.
+# ==============================================================================
+
+# 1. Model Selection
+# Recommended flagship:
+model: openai/nvidia/nemotron-3-ultra-550b-a55b
+
+# 2. NVIDIA NIM Endpoint & Authentication
+openai-api-base: https://integrate.api.nvidia.com/v1
+# Note: You can also export OPENAI_API_KEY / NVIDIA_API_KEY in your shell or .env
+# openai-api-key: nvapi-your-key-here
+
+# 3. Model Settings & Metadata Files
+# Point to the custom configurations for optimal diff editing & token context limits
+# model-settings-file: ~/.aider.model.settings.yml
+# model-metadata-file: ~/.aider.model.metadata.json
+
+# 4. Coding & Edit Format Options
+# edit-format: diff
+# auto-commits: true
+# dirty-commits: true
+# show-repo-map: true
+
+# 5. Architect Mode (Optional Dual-Model Pair Programming)
+# architect: true
+# editor-model: openai/nvidia/nemotron-3-super-120b-a12b
+# editor-edit-format: editor-diff
+
+# 6. UI & Experience
+# dark-mode: true
+# stream: true
+# show-model-warnings: false

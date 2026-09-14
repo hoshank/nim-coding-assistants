@@ -185,11 +185,12 @@ def load_models_from_config() -> List[Tuple[str, str]]:
     return [
         ("nvidia/nemotron-3-ultra-550b-a55b", "Nemotron 3 Ultra 550B • Default Flagship"),
         ("nvidia/nemotron-3-super-120b-a12b", "Nemotron 3 Super 120B • Fast Reasoning & Planning"),
-        ("deepseek-ai/deepseek-v4-pro", "DeepSeek V4 Pro • Coding & Refactoring"),
-        ("deepseek-ai/deepseek-v4-flash-0731", "DeepSeek V4 Flash • Low-Latency Completions"),
+        ("deepseek-ai/deepseek-v4-pro-0813", "DeepSeek V4 Pro (0813) • Coding & Refactoring"),
+        ("deepseek-ai/deepseek-v4-flash-0731", "DeepSeek V4 Flash (0731) • Low-Latency Completions"),
         ("minimaxai/minimax-m3", "MiniMax M3 • Vision & UI Understanding"),
         ("z-ai/glm-5.2", "GLM 5.2 • General Coding"),
         ("thinkingmachines/inkling", "Inkling • Interleaved Reasoning & Vision"),
+        ("moonshotai/kimi-k3", "Kimi K3 • Long-Horizon Reasoning & Coding"),
         ("[ Enter Custom Model ID ]", "Type any custom NVIDIA NIM model"),
     ]
 
@@ -202,16 +203,21 @@ def prompt_custom_input(prompt_text: str, default_val: str = "") -> str:
 
 def main():
     parser = argparse.ArgumentParser(description="Interactive Launcher Menu for NIM Coding Assistants")
-    parser.add_argument("--app", choices=["claude", "codex"], default="claude", help="Target assistant")
+    parser.add_argument("--app", choices=["claude", "codex", "aider"], default="claude", help="Target assistant")
     parser.add_argument("--output", type=str, help="Path to write chosen shell environment variables")
     args = parser.parse_args()
 
-    app_name = "Claude Code" if args.app == "claude" else "Codex CLI"
+    if args.app == "claude":
+        app_name = "Claude Code"
+    elif args.app == "codex":
+        app_name = "Codex CLI"
+    else:
+        app_name = "Aider Chat"
 
     # Header banner
     print(f"{CYAN}{BOLD}")
     print("╔══════════════════════════════════════════════════════════════════════╗")
-    print(f"║          🚀 NVIDIA NIM Interactive Setup ({app_name:11})          ║")
+    print(f"║          🚀 NVIDIA NIM Interactive Setup ({app_name:18})   ║")
     print("║     Use ↑/↓ arrows or number keys to choose, Enter to confirm        ║")
     print("╚══════════════════════════════════════════════════════════════════════╝")
     print(f"{RESET}")
@@ -229,7 +235,9 @@ def main():
         chosen_model = prompt_custom_input("Enter NVIDIA NIM Model ID (e.g. meta/llama-3.3-70b-instruct):", "nvidia/nemotron-3-ultra-550b-a55b")
         print(f"  {GREEN}✔ Custom Model Set:{RESET} {BOLD}{chosen_model}{RESET}\n")
 
-    # 2. Profile Selection
+    # 2. Profile / Workflow Selection
+    chosen_profile = ""
+    chosen_aider_mode = "diff"
     if args.app == "claude":
         profile_options = [
             ("default", "Standard shared profile ~/.claude"),
@@ -249,7 +257,7 @@ def main():
             print(f"  {GREEN}✔ Custom Profile Created:{RESET} {BOLD}{chosen_profile}{RESET}\n")
         elif chosen_profile == "default":
             chosen_profile = ""
-    else:
+    elif args.app == "codex":
         # Codex profiles
         profile_options = [
             ("danger-full-access", "Full sandbox access & auto-approved commands [Recommended]"),
@@ -267,6 +275,20 @@ def main():
         if chosen_profile == "[ Custom Profile ]":
             chosen_profile = prompt_custom_input("Enter custom profile name from ~/.codex/<name>.config.toml:", "nim")
             print(f"  {GREEN}✔ Profile Set:{RESET} {BOLD}{chosen_profile}{RESET}\n")
+    else:
+        # Aider Workflow Modes
+        aider_modes = [
+            ("architect", "Architect Mode (Dual-model: Nemotron 3 Ultra plans, Super 120B edits) [Recommended]"),
+            ("diff", "Standard Pair Programming (Diff search/replace format)"),
+            ("whole", "Whole File Editing (Rewrites full files)"),
+        ]
+        mode_idx = interactive_select(
+            title="Step 2: Select Aider Workflow Mode",
+            subtitle="Choose between architect dual-model reasoning or direct diff editing:",
+            options=aider_modes,
+            default_index=0
+        )
+        chosen_aider_mode = aider_modes[mode_idx][0]
 
     # 3. Reasoning Effort
     effort_options = [
@@ -282,9 +304,10 @@ def main():
     )
     chosen_effort = effort_options[effort_idx][0]
 
-    # 4. Permission / Approval Handling
+    # 4. Permission / Approval / Git Handling
     skip_permissions = True
     codex_flags = []
+    aider_auto_commits = True
 
     if args.app == "claude":
         perm_options = [
@@ -298,7 +321,7 @@ def main():
             default_index=0
         )
         skip_permissions = (perm_idx == 0)
-    else:
+    elif args.app == "codex":
         # Codex approval & sandbox policies
         perm_options = [
             ("Bypass all approvals & sandbox (--dangerously-bypass-approvals-and-sandbox)", "Skip all confirmation prompts and execute without sandboxing [Recommended]"),
@@ -320,6 +343,19 @@ def main():
             codex_flags = ["--approve-for-me"]
         else:
             codex_flags = []
+    else:
+        # Aider Git Commit Handling
+        git_options = [
+            ("Auto-commit edits", "Automatically commit each successful AI edit with descriptive commit message [Recommended]"),
+            ("Manual git commits (--no-auto-commits)", "Leave modified files unstaged for manual review"),
+        ]
+        git_idx = interactive_select(
+            title="Step 4: Git Auto-Commit Behavior",
+            subtitle="Choose how Aider interacts with your Git repository:",
+            options=git_options,
+            default_index=0
+        )
+        aider_auto_commits = (git_idx == 0)
 
     print(f"{GREEN}{BOLD}✓ Configuration confirmed. Triggering {app_name}...{RESET}\n")
 
@@ -333,9 +369,12 @@ def main():
             f.write(f'EFFORT="{chosen_effort}"\n')
             if args.app == "claude":
                 f.write(f'SKIP_PERMISSIONS="{"true" if skip_permissions else "false"}"\n')
-            else:
+            elif args.app == "codex":
                 flags_str = " ".join(codex_flags)
                 f.write(f'CODEX_PERM_FLAGS="{flags_str}"\n')
+            else:
+                f.write(f'AIDER_MODE="{chosen_aider_mode}"\n')
+                f.write(f'AIDER_AUTO_COMMITS="{"true" if aider_auto_commits else "false"}"\n')
 
 if __name__ == "__main__":
     main()

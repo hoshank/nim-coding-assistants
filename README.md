@@ -1,11 +1,11 @@
-# 🚀 NIM Coding Assistants (Claude Code, Codex CLI & Zed Editor)
+# 🚀 NIM Coding Assistants (Claude Code, Codex CLI, Aider & Zed Editor)
 
 [![macOS](https://img.shields.io/badge/macOS-supported-brightgreen?logo=apple)]()
 [![Linux](https://img.shields.io/badge/Linux-supported-brightgreen?logo=linux)]()
 [![Windows](https://img.shields.io/badge/Windows-supported-brightgreen?logo=windows)]()
 [![NVIDIA NIM](https://img.shields.io/badge/NVIDIA-NIM%20Catalog-76B900?logo=nvidia)]()
 
-A lightweight, cross-platform bridge and launcher toolkit to run **Claude Code**, **Codex CLI**, and **Zed Editor** with **NVIDIA NIM** (NVIDIA Cloud API Catalog and self-hosted NIM microservices).
+A lightweight, cross-platform bridge and launcher toolkit to run **Claude Code**, **Codex CLI**, **Aider**, and **Zed Editor** with **NVIDIA NIM** (NVIDIA Cloud API Catalog and self-hosted NIM microservices).
 
 ---
 
@@ -16,6 +16,7 @@ graph TD
     subgraph Clients["AI Coding Clients"]
         CC["Claude Code CLI (Anthropic Format)"]
         CX["Codex CLI (OpenAI Format)"]
+        AID["Aider CLI (OpenAI Compatible)"]
         ZD["Zed Editor (OpenAI Compatible)"]
     end
 
@@ -35,6 +36,9 @@ graph TD
     CX -->|Direct OpenAI Format| CAT
     CX -.->|Direct OpenAI Format| SH
 
+    AID -->|Direct OpenAI Format| CAT
+    AID -.->|Direct OpenAI Format| SH
+
     ZD -->|Direct OpenAI Format| CAT
     ZD -.->|Direct OpenAI Format| SH
 ```
@@ -47,11 +51,12 @@ graph TD
 | :--- | :---: | :---: | :---: | :---: | :--- |
 | **`nvidia/nemotron-3-ultra-550b-a55b`** | NVIDIA | ✅ Yes | ❌ | 1,048,576 | **Recommended Default** — Ultra 550B flagship |
 | `nvidia/nemotron-3-super-120b-a12b` | NVIDIA | ✅ Yes | ❌ | 1,048,576 | High-speed reasoning & agentic planning |
-| `deepseek-ai/deepseek-v4-pro` | DeepSeek | ✅ Yes | ❌ | 1,048,500 | Advanced coding & refactoring |
+| `deepseek-ai/deepseek-v4-pro-0813` | DeepSeek | ✅ Yes | ❌ | 1,048,500 | Advanced coding & refactoring |
 | `deepseek-ai/deepseek-v4-flash-0731`| DeepSeek | ✅ Yes | ❌ | 1,048,576 | Low-latency completions |
 | `minimaxai/minimax-m3` | MiniMax | ✅ Yes | ✅ Yes | 524,288 | Multimodal vision & UI tasks |
 | `z-ai/glm-5.2` | Z-AI | ✅ Yes | ❌ | 1,048,576 | General coding and reasoning |
 | `thinkingmachines/inkling` | Thinking Machines | ✅ Yes | ✅ Yes | 131,072 | Interleaved reasoning, vision & tools |
+| `moonshotai/kimi-k3` | Moonshot AI | ✅ Yes | ✅ Yes | 1,048,576 | Long-horizon reasoning, agentic coding & vision |
 
 > 💡 *Need to add or modify models later? Check the [Adding Models Guide](docs/ADDING_MODELS.md).*
 
@@ -83,6 +88,12 @@ claude-nim
 # Launch Codex CLI (connects directly to NVIDIA NIM)
 codex-nim
 
+# Launch Aider (Pair programmer with full 1M context & diff editing)
+aider-nim
+
+# Launch Aider in Architect Mode (Nemotron 3 Ultra plans, Super 120B edits)
+aider-nim --architect
+
 # Configure Zed Editor automatically
 ./scripts/mac-linux/setup-zed.sh
 ```
@@ -113,6 +124,12 @@ claude-nim
 # Launch Codex CLI
 codex-nim
 
+# Launch Aider
+aider-nim
+
+# Launch Aider in Architect Mode
+aider-nim --architect
+
 # Configure Zed Editor automatically
 powershell -ExecutionPolicy Bypass -File .\scripts\windows\setup-zed.ps1
 ```
@@ -121,7 +138,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\windows\setup-zed.ps1
 
 ## ⚡ Already Have Tools Installed? (Quick Configuration)
 
-If you already have **Claude Code**, **Codex CLI**, or **Zed Editor** installed and just want to configure them to point to NVIDIA NIM without re-installing or overwriting custom configurations, check out:
+If you already have **Claude Code**, **Codex CLI**, **Aider**, or **Zed Editor** installed and just want to configure them to point to NVIDIA NIM without re-installing or overwriting custom configurations, check out:
 
 👉 **[Guide: Configuring Existing Installations for NVIDIA NIM](docs/EXISTING_INSTALLATION.md)**
 
@@ -130,6 +147,7 @@ If you already have **Claude Code**, **Codex CLI**, or **Zed Editor** installed 
 ## 📖 In-Depth Guides
 
 - ⚙️ **[Configuring Existing Installations](docs/EXISTING_INSTALLATION.md)**: Zero-fuss configuration for tools already installed on your system.
+- 🤖 **[Aider Integration Guide](docs/AIDER.md)**: Pair programming with Architect mode, 1M context windows, and surgical diff editing.
 - 🧩 **[Zed Editor Setup Guide](docs/ZED_SETUP.md)**: Full instructions for setting up Zed's Assistant panel, inline edit predictions, and setting your API key via `Cmd+Shift+P`.
 - 🤖 **[Claude Code Integration Guide](docs/CLAUDE_CODE.md)**: Details on the Anthropic-to-OpenAI translation layer, parameter stripping (`output_config`, `context_management`), and subagent handling.
 - 💻 **[Codex CLI Integration Guide](docs/CODEX_CLI.md)**: How to configure Codex CLI via `codex-nim` or `~/.codex/config.toml`.
@@ -152,7 +170,7 @@ claude-nim --choose              # or -c
 
 # 3. Model selection options
 claude-nim --model nvidia/nemotron-3-super-120b-a12b
-claude-nim -m deepseek-ai/deepseek-v4-pro
+claude-nim -m deepseek-ai/deepseek-v4-pro-0813
 claude-nim -m minimaxai/minimax-m3
 
 # 4. Profile selection options (isolated ~/.claude-profiles/<name>)
@@ -160,7 +178,7 @@ claude-nim --profile dev        # or -P dev
 claude-nim --profile vanilla    # clean, plugin-free profile
 
 # 5. Combined Profile + Model + Reasoning Effort
-claude-nim -P dev -m deepseek-ai/deepseek-v4-pro --effort high
+claude-nim -P dev -m deepseek-ai/deepseek-v4-pro-0813 --effort high
 
 # 6. Safety & Permission options
 claude-nim --safe               # Disable auto-skip; require manual approvals for all actions
@@ -186,7 +204,7 @@ codex-nim --choose              # or -c
 
 # 3. Model selection options
 codex-nim --model nvidia/nemotron-3-super-120b-a12b
-codex-nim -m deepseek-ai/deepseek-v4-pro
+codex-nim -m deepseek-ai/deepseek-v4-pro-0813
 
 # 4. Profile selection options (layers ~/.codex/<profile>.config.toml or built-ins)
 codex-nim --profile danger-full-access    # or -p danger-full-access (bypasses sandbox & approvals)
@@ -194,7 +212,7 @@ codex-nim -p workspace-write              # Sandbox allows local workspace edits
 codex-nim -p read-only                    # Safe read-only inspection
 
 # 5. Combined Profile + Model + Effort
-codex-nim -p danger-full-access -m deepseek-ai/deepseek-v4-pro -e high
+codex-nim -p danger-full-access -m deepseek-ai/deepseek-v4-pro-0813 -e high
 
 # 6. Permission & Approval Bypass Shortcuts
 codex-nim --dangerously-bypass-approvals-and-sandbox
@@ -202,6 +220,29 @@ codex-nim -a never
 
 # 7. Custom or self-hosted endpoint
 codex-nim --url http://localhost:8000/v1
+```
+
+### Aider (`aider-nim`)
+
+```bash
+# 1. Default launch (Nemotron 3 Ultra 550B + 1M token context window)
+aider-nim
+
+# 2. Interactive model & mode chooser (TUI dropdown)
+aider-nim --choose              # or -c
+
+# 3. Architect Mode (Nemotron 3 Ultra 550B plans, Super 120B applies diffs)
+aider-nim --architect           # or -A
+
+# 4. Model selection options
+aider-nim --model nvidia/nemotron-3-super-120b-a12b
+aider-nim -m deepseek-ai/deepseek-v4-pro-0813
+
+# 5. Combined Architect + Custom Editor + Effort
+aider-nim -A -m deepseek-ai/deepseek-v4-pro-0813 --editor-model deepseek-ai/deepseek-v4-flash-0731 -e high
+
+# 6. Git commit behavior
+aider-nim --no-auto-commits     # Keep edits unstaged for manual review
 ```
 
 ---
@@ -263,5 +304,6 @@ If Claude Code fails with `"The model's tool call could not be parsed (retry als
 - Python 3.10+
 - [Claude Code CLI](https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview) (`npm install -g @anthropic-ai/claude-code`)
 - [Codex CLI](https://github.com/openai/codex) (optional)
+- [Aider](https://aider.chat/) (`uv tool install --python 3.12 aider-chat` or `pip install aider-chat`) (optional)
 - [Zed Editor](https://zed.dev/) (optional)
 - NVIDIA API Key from [build.nvidia.com](https://build.nvidia.com/)

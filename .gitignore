@@ -22,3 +22,9 @@ litellm.log
 # OS artifacts
 .DS_Store
 Thumbs.db
+
+# Aider runtime artifacts
+.aider*
+!.aider.conf.yml
+!.aider.model.settings.yml
+!.aider.model.metadata.json

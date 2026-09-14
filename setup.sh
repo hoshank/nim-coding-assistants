@@ -26,7 +26,7 @@ print_banner() {
   echo -e "${CYAN}${BOLD}"
   echo "╔══════════════════════════════════════════════════════════════╗"
   echo "║          🚀 NVIDIA NIM Coding Assistants Setup               ║"
-  echo "║       Claude Code • Codex CLI • Zed Editor Integration       ║"
+  echo "║  Claude Code • Codex CLI • Aider • Zed Editor Integration    ║"
   echo "╚══════════════════════════════════════════════════════════════╝"
   echo -e "${NC}"
 }
@@ -75,7 +75,16 @@ run_diagnostics() {
     echo -e "  [!] Codex CLI: ${YELLOW}Not found in PATH.${NC}"
   fi
 
-  # 5. Check .env and API Key
+  # 5. Check Aider CLI
+  if command -v aider &>/dev/null || [ -x "$HOME/.local/bin/aider" ]; then
+    AIDER_VER=$(aider --version 2>/dev/null || echo "installed")
+    echo -e "  [✔] Aider CLI: ${GREEN}$AIDER_VER${NC}"
+  else
+    echo -e "  [!] Aider CLI: ${YELLOW}Not found in PATH.${NC}"
+    echo -e "      Install with: ${CYAN}uv tool install --python 3.12 aider-chat${NC}"
+  fi
+
+  # 6. Check .env and API Key
   if [ -f "$ENV_FILE" ]; then
     echo -e "  [✔] Environment File: ${GREEN}.env exists${NC}"
     # Read key safely
@@ -104,14 +113,14 @@ run_diagnostics() {
     errors=$((errors + 1))
   fi
 
-  # 6. Check Symlinks
-  if [ -x "$BIN_DIR/claude-nim" ] && [ -x "$BIN_DIR/codex-nim" ]; then
-    echo -e "  [✔] Global CLI Launchers: ${GREEN}Installed in $BIN_DIR${NC}"
+  # 7. Check Symlinks
+  if [ -x "$BIN_DIR/claude-nim" ] && [ -x "$BIN_DIR/codex-nim" ] && [ -x "$BIN_DIR/aider-nim" ]; then
+    echo -e "  [✔] Global CLI Launchers: ${GREEN}Installed in $BIN_DIR (claude-nim, codex-nim, aider-nim)${NC}"
   else
-    echo -e "  [!] Global CLI Launchers: ${YELLOW}Missing or not executable in $BIN_DIR${NC}"
+    echo -e "  [!] Global CLI Launchers: ${YELLOW}Missing or incomplete in $BIN_DIR${NC}"
   fi
 
-  # 7. Check Zed Editor
+  # 8. Check Zed Editor
   ZED_SETTINGS="$HOME/.config/zed/settings.json"
   if command -v zed &>/dev/null || [ -d "/Applications/Zed.app" ] || [ -d "$HOME/.config/zed" ]; then
     if [ -f "$ZED_SETTINGS" ] && grep -q '"Nvidia"' "$ZED_SETTINGS" 2>/dev/null; then
@@ -122,9 +131,17 @@ run_diagnostics() {
     fi
   fi
 
+  # 9. Check Aider Config
+  AIDER_CONF="$HOME/.aider.conf.yml"
+  if [ -f "$AIDER_CONF" ]; then
+    echo -e "  [✔] Aider Global Config: ${GREEN}Found at $AIDER_CONF${NC}"
+  else
+    echo -e "  [!] Aider Global Config: ${YELLOW}Not configured yet. Run ./scripts/mac-linux/setup-aider.sh${NC}"
+  fi
+
   echo ""
   if [ $errors -eq 0 ]; then
-    echo -e "${GREEN}${BOLD}All critical checks passed! You are ready to run claude-nim and codex-nim.${NC}\n"
+    echo -e "${GREEN}${BOLD}All critical checks passed! You are ready to run claude-nim, codex-nim, and aider-nim.${NC}\n"
   else
     echo -e "${YELLOW}${BOLD}Found $errors item(s) to configure or resolve.${NC}\n"
   fi
@@ -228,9 +245,9 @@ fi
 echo ""
 
 # ------------------------------------------------------------------------------
-# 4. Check & Optionally Install Claude Code CLI
+# 4. Check & Optionally Install Claude Code, Codex, and Aider CLI
 # ------------------------------------------------------------------------------
-echo -e "${CYAN}▶ Step 4: Checking Claude Code & Codex CLI...${NC}"
+echo -e "${CYAN}▶ Step 4: Checking Coding Assistant CLIs (Claude, Codex, Aider)...${NC}"
 if command -v claude &>/dev/null; then
   echo -e "  ${GREEN}✔ Claude Code CLI detected ($(claude --version 2>/dev/null || echo 'installed'))${NC}"
 else
@@ -254,6 +271,30 @@ if command -v codex &>/dev/null; then
 else
   echo -e "  ${YELLOW}! Codex CLI ('codex') is not installed yet.${NC}"
 fi
+
+if command -v aider &>/dev/null || [ -x "$HOME/.local/bin/aider" ]; then
+  echo -e "  ${GREEN}✔ Aider CLI detected ($(aider --version 2>/dev/null || echo 'installed'))${NC}"
+else
+  echo -e "  ${YELLOW}! Aider CLI ('aider') is not installed yet.${NC}"
+  if command -v uv &>/dev/null; then
+    read -r -p "  Would you like to install Aider CLI globally via uv now? [y/N]: " INSTALL_AIDER
+    if [[ "$INSTALL_AIDER" =~ ^[Yy]$ ]]; then
+      echo "  Running: uv tool install --python 3.12 aider-chat..."
+      uv tool install --python 3.12 aider-chat
+      echo -e "  ${GREEN}✔ Aider CLI installed successfully.${NC}"
+    else
+      echo -e "  ${YELLOW}Skipped. You can install it later with: uv tool install --python 3.12 aider-chat${NC}"
+    fi
+  elif command -v pipx &>/dev/null; then
+    read -r -p "  Would you like to install Aider CLI globally via pipx now? [y/N]: " INSTALL_AIDER
+    if [[ "$INSTALL_AIDER" =~ ^[Yy]$ ]]; then
+      pipx install aider-chat
+      echo -e "  ${GREEN}✔ Aider CLI installed successfully.${NC}"
+    fi
+  else
+    echo -e "  ${YELLOW}Install Aider later with: uv tool install --python 3.12 aider-chat${NC}"
+  fi
+fi
 echo ""
 
 # ------------------------------------------------------------------------------
@@ -263,17 +304,21 @@ echo -e "${CYAN}▶ Step 5: Linking CLI launcher commands...${NC}"
 chmod +x "$SCRIPT_DIR/proxy.py"
 chmod +x "$SCRIPT_DIR/scripts/mac-linux/claude-nim.sh"
 chmod +x "$SCRIPT_DIR/scripts/mac-linux/codex-nim.sh"
+chmod +x "$SCRIPT_DIR/scripts/mac-linux/aider-nim.sh"
 chmod +x "$SCRIPT_DIR/scripts/mac-linux/install.sh"
 chmod +x "$SCRIPT_DIR/scripts/mac-linux/setup-zed.sh"
+chmod +x "$SCRIPT_DIR/scripts/mac-linux/setup-aider.sh"
 chmod +x "$SCRIPT_DIR/setup.sh"
 
 mkdir -p "$BIN_DIR"
 ln -sf "$SCRIPT_DIR/scripts/mac-linux/claude-nim.sh" "$BIN_DIR/claude-nim"
 ln -sf "$SCRIPT_DIR/scripts/mac-linux/codex-nim.sh" "$BIN_DIR/codex-nim"
+ln -sf "$SCRIPT_DIR/scripts/mac-linux/aider-nim.sh" "$BIN_DIR/aider-nim"
 
 echo -e "  ${GREEN}✔ Created global symlinks in $BIN_DIR:${NC}"
 echo "    • claude-nim -> Launch Claude Code through NVIDIA NIM bridge"
 echo "    • codex-nim  -> Launch Codex CLI connected directly to NVIDIA NIM"
+echo "    • aider-nim  -> Launch Aider with Architect mode & NIM diff editing"
 
 # Check PATH
 if [[ ":$PATH:" != *":$BIN_DIR:"* ]]; then
@@ -285,9 +330,9 @@ fi
 echo ""
 
 # ------------------------------------------------------------------------------
-# 6. Check & Configure Zed Editor
+# 6. Check & Configure Zed Editor and Aider
 # ------------------------------------------------------------------------------
-echo -e "${CYAN}▶ Step 6: Checking Zed Editor Integration...${NC}"
+echo -e "${CYAN}▶ Step 6: Checking Editor & Tool Integrations...${NC}"
 if command -v zed &>/dev/null || [ -d "/Applications/Zed.app" ] || [ -d "$HOME/.config/zed" ]; then
   echo -e "  ${GREEN}✔ Zed Editor detected!${NC}"
   read -r -p "  Would you like to configure Zed Editor for NVIDIA NIM now? [Y/n]: " CONFIGURE_ZED
@@ -300,6 +345,16 @@ else
   echo -e "  ${YELLOW}Zed Editor not detected. Run ./scripts/mac-linux/setup-zed.sh if you install Zed later.${NC}"
 fi
 
+if command -v aider &>/dev/null || [ -x "$HOME/.local/bin/aider" ]; then
+  echo -e "  ${GREEN}✔ Aider detected!${NC}"
+  read -r -p "  Would you like to configure global ~/.aider.conf.yml for NVIDIA NIM now? [Y/n]: " CONFIGURE_AIDER
+  if [[ ! "$CONFIGURE_AIDER" =~ ^[Nn]$ ]]; then
+    "$SCRIPT_DIR/scripts/mac-linux/setup-aider.sh"
+  else
+    echo -e "  ${YELLOW}Skipped. Run ./scripts/mac-linux/setup-aider.sh anytime to configure Aider.${NC}"
+  fi
+fi
+
 echo ""
 echo -e "${GREEN}${BOLD}══════════════════════════════════════════════════════════════${NC}"
 echo -e "${GREEN}${BOLD} 🎉 Setup Complete! Everything is ready to go.${NC}"
@@ -309,5 +364,6 @@ echo "Try running:"
 echo -e "  ${CYAN}./setup.sh --doctor${NC}   Check health of your entire setup"
 echo -e "  ${CYAN}claude-nim${NC}            Start Claude Code with NVIDIA NIM"
 echo -e "  ${CYAN}codex-nim${NC}             Start Codex CLI with NVIDIA NIM"
+echo -e "  ${CYAN}aider-nim${NC}             Start Aider Pair Programmer with NVIDIA NIM"
 echo -e "  ${CYAN}zed .${NC}                 Launch Zed Editor with NVIDIA NIM Assistant"
 echo ""

@@ -59,9 +59,11 @@ All other arguments are passed directly to `codex`.
 Supported Tested Models:
   - nvidia/nemotron-3-ultra-550b-a55b (Recommended default)
   - nvidia/nemotron-3-super-120b-a12b
-  - deepseek-ai/deepseek-v4-pro
+  - deepseek-ai/deepseek-v4-pro-0813
+  - deepseek-ai/deepseek-v4-flash-0731
   - minimaxai/minimax-m3
   - thinkingmachines/inkling
+  - moonshotai/kimi-k3
 EOF
 }
 
@@ -196,6 +198,10 @@ base_url = "$BASE_URL"
 env_key = "NVIDIA_API_KEY"
 wire_api = "responses"
 EOF
+
+if [[ "$MODEL" == *"kimi-k3"* && "$EFFORT" == "medium" ]]; then
+  EFFORT="high"
+fi
 
 NIM_CONFIG_ARGS=(
   -c "model_provider=\"nvidia_nim\""

@@ -120,12 +120,12 @@
           {
             "name": "moonshotai/kimi-k3",
             "display_name": "Kimi K3",
-            "max_tokens": 262144,
+            "max_tokens": 1048576,
             "max_output_tokens": 32768,
-            "max_completion_tokens": 32768,
+            "max_completion_tokens": 65536,
             "capabilities": {
               "tools": true,
-              "images": false,
+              "images": true,
               "parallel_tool_calls": true,
               "prompt_cache_key": false,
               "chat_completions": true

@@ -89,11 +89,13 @@ async def list_models():
         available = [
             {"id": "nvidia/nemotron-3-ultra-550b-a55b", "object": "model"},
             {"id": "nvidia/nemotron-3-super-120b-a12b", "object": "model"},
+            {"id": "deepseek-ai/deepseek-v4-pro-0813", "object": "model"},
             {"id": "deepseek-ai/deepseek-v4-pro", "object": "model"},
             {"id": "deepseek-ai/deepseek-v4-flash-0731", "object": "model"},
             {"id": "minimaxai/minimax-m3", "object": "model"},
             {"id": "z-ai/glm-5.2", "object": "model"},
-            {"id": "thinkingmachines/inkling", "object": "model"}
+            {"id": "thinkingmachines/inkling", "object": "model"},
+            {"id": "moonshotai/kimi-k3", "object": "model"}
         ]
     return {"data": available}
 

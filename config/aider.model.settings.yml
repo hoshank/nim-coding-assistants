@@ -1,0 +1,159 @@
+# ==============================================================================
+# Aider Model Settings for NVIDIA NIM Catalog
+# Configures edit formats, repo-map, streaming, and reasoning parameters.
+# Compatible with both 'openai/' and 'nvidia_nim/' prefixes in Aider.
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# NVIDIA Nemotron 3 Ultra 550B (Flagship Default)
+# ------------------------------------------------------------------------------
+- name: openai/nvidia/nemotron-3-ultra-550b-a55b
+  edit_format: diff
+  weak_model_name: openai/nvidia/nemotron-3-super-120b-a12b
+  editor_model_name: openai/nvidia/nemotron-3-super-120b-a12b
+  editor_edit_format: editor-diff
+  use_repo_map: true
+  streaming: true
+  accepts_settings:
+    - reasoning_effort
+
+- name: nvidia_nim/nvidia/nemotron-3-ultra-550b-a55b
+  edit_format: diff
+  weak_model_name: nvidia_nim/nvidia/nemotron-3-super-120b-a12b
+  editor_model_name: nvidia_nim/nvidia/nemotron-3-super-120b-a12b
+  editor_edit_format: editor-diff
+  use_repo_map: true
+  streaming: true
+  accepts_settings:
+    - reasoning_effort
+
+# ------------------------------------------------------------------------------
+# NVIDIA Nemotron 3 Super 120B (High-Efficiency Reasoning & Planning)
+# ------------------------------------------------------------------------------
+- name: openai/nvidia/nemotron-3-super-120b-a12b
+  edit_format: diff
+  weak_model_name: openai/nvidia/nemotron-3-super-120b-a12b
+  use_repo_map: true
+  streaming: true
+  accepts_settings:
+    - reasoning_effort
+
+- name: nvidia_nim/nvidia/nemotron-3-super-120b-a12b
+  edit_format: diff
+  weak_model_name: nvidia_nim/nvidia/nemotron-3-super-120b-a12b
+  use_repo_map: true
+  streaming: true
+  accepts_settings:
+    - reasoning_effort
+
+# ------------------------------------------------------------------------------
+# DeepSeek V4 Pro (Advanced Coding & Refactoring - 0813)
+# ------------------------------------------------------------------------------
+- name: openai/deepseek-ai/deepseek-v4-pro-0813
+  edit_format: diff
+  weak_model_name: openai/deepseek-ai/deepseek-v4-flash-0731
+  editor_model_name: openai/deepseek-ai/deepseek-v4-flash-0731
+  editor_edit_format: editor-diff
+  use_repo_map: true
+  streaming: true
+  accepts_settings:
+    - reasoning_effort
+
+- name: nvidia_nim/deepseek-ai/deepseek-v4-pro-0813
+  edit_format: diff
+  weak_model_name: nvidia_nim/deepseek-ai/deepseek-v4-flash-0731
+  editor_model_name: nvidia_nim/deepseek-ai/deepseek-v4-flash-0731
+  editor_edit_format: editor-diff
+  use_repo_map: true
+  streaming: true
+  accepts_settings:
+    - reasoning_effort
+
+- name: openai/deepseek-ai/deepseek-v4-pro
+  edit_format: diff
+  weak_model_name: openai/deepseek-ai/deepseek-v4-flash-0731
+  editor_model_name: openai/deepseek-ai/deepseek-v4-flash-0731
+  editor_edit_format: editor-diff
+  use_repo_map: true
+  streaming: true
+  accepts_settings:
+    - reasoning_effort
+
+- name: nvidia_nim/deepseek-ai/deepseek-v4-pro
+  edit_format: diff
+  weak_model_name: nvidia_nim/deepseek-ai/deepseek-v4-flash-0731
+  editor_model_name: nvidia_nim/deepseek-ai/deepseek-v4-flash-0731
+  editor_edit_format: editor-diff
+  use_repo_map: true
+  streaming: true
+  accepts_settings:
+    - reasoning_effort
+
+# ------------------------------------------------------------------------------
+# DeepSeek V4 Flash 0731 (Low-Latency Completions)
+# ------------------------------------------------------------------------------
+- name: openai/deepseek-ai/deepseek-v4-flash-0731
+  edit_format: diff
+  use_repo_map: true
+  streaming: true
+
+- name: nvidia_nim/deepseek-ai/deepseek-v4-flash-0731
+  edit_format: diff
+  use_repo_map: true
+  streaming: true
+
+# ------------------------------------------------------------------------------
+# MiniMax M3 (Multimodal Vision & UI Understanding)
+# ------------------------------------------------------------------------------
+- name: openai/minimaxai/minimax-m3
+  edit_format: diff
+  use_repo_map: true
+  streaming: true
+
+- name: nvidia_nim/minimaxai/minimax-m3
+  edit_format: diff
+  use_repo_map: true
+  streaming: true
+
+# ------------------------------------------------------------------------------
+# Z-AI GLM 5.2 (General Coding & Reasoning)
+# ------------------------------------------------------------------------------
+- name: openai/z-ai/glm-5.2
+  edit_format: diff
+  use_repo_map: true
+  streaming: true
+
+- name: nvidia_nim/z-ai/glm-5.2
+  edit_format: diff
+  use_repo_map: true
+  streaming: true
+
+# ------------------------------------------------------------------------------
+# Thinking Machines Inkling (Interleaved Reasoning & Vision)
+# ------------------------------------------------------------------------------
+- name: openai/thinkingmachines/inkling
+  edit_format: diff
+  use_repo_map: true
+  streaming: true
+
+- name: nvidia_nim/thinkingmachines/inkling
+  edit_format: diff
+  use_repo_map: true
+  streaming: true
+
+# ------------------------------------------------------------------------------
+# Moonshot AI Kimi K3 (Long-Horizon Reasoning & Coding)
+# ------------------------------------------------------------------------------
+- name: openai/moonshotai/kimi-k3
+  edit_format: diff
+  use_repo_map: true
+  streaming: true
+  accepts_settings:
+    - reasoning_effort
+
+- name: nvidia_nim/moonshotai/kimi-k3
+  edit_format: diff
+  use_repo_map: true
+  streaming: true
+  accepts_settings:
+    - reasoning_effort

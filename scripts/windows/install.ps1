@@ -71,12 +71,15 @@ if (-not (Test-Path $binDir)) {
 
 $claudeCmd = Join-Path $binDir "claude-nim.cmd"
 $codexCmd = Join-Path $binDir "codex-nim.cmd"
+$aiderCmd = Join-Path $binDir "aider-nim.cmd"
 
 $psClaude = Join-Path $ScriptDir "scripts\windows\claude-nim.ps1"
 $psCodex = Join-Path $ScriptDir "scripts\windows\codex-nim.ps1"
+$psAider = Join-Path $ScriptDir "scripts\windows\aider-nim.ps1"
 
 "@echo off`r`npowershell -ExecutionPolicy Bypass -File `"$psClaude`" %*" | Set-Content $claudeCmd -Encoding ASCII
 "@echo off`r`npowershell -ExecutionPolicy Bypass -File `"$psCodex`" %*" | Set-Content $codexCmd -Encoding ASCII
+"@echo off`r`npowershell -ExecutionPolicy Bypass -File `"$psAider`" %*" | Set-Content $aiderCmd -Encoding ASCII
 
 # Check user PATH for $binDir
 $userPath = [Environment]::GetEnvironmentVariable("Path", "User")
@@ -92,8 +95,10 @@ Write-Host "==========================================================" -Foregro
 Write-Host "Commands installed:"
 Write-Host "  • claude-nim  -> Run Claude Code with NVIDIA NIM"
 Write-Host "  • codex-nim   -> Run Codex CLI with NVIDIA NIM"
+Write-Host "  • aider-nim   -> Run Aider Pair Programmer with NVIDIA NIM"
 Write-Host ""
 Write-Host "Restart your terminal and try:"
 Write-Host "  claude-nim --help"
 Write-Host "  codex-nim --help"
+Write-Host "  aider-nim --help"
 Write-Host "==========================================================" -ForegroundColor Green

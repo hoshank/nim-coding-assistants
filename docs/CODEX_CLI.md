@@ -40,16 +40,16 @@ codex-nim -y                   # or --yes, --quick
 codex-nim --choose             # or -c
 
 # 4. Model selection
-codex-nim --model deepseek-ai/deepseek-v4-pro
+codex-nim --model deepseek-ai/deepseek-v4-pro-0813
 codex-nim -m nvidia/nemotron-3-super-120b-a12b
 
 # 5. Profile selection (built-in profiles or ~/.codex/<profile>.config.toml)
 codex-nim --profile danger-full-access    # or -p danger-full-access (skips sandbox & approvals)
 codex-nim -p workspace-write              # Sandbox writes within workspace only
-codex-nim -p read-only                    # Read-only exploration
+codex-nim -p read-only                    # Safe read-only inspection
 
 # 6. Combined Profile + Model + Effort
-codex-nim -p danger-full-access -m deepseek-ai/deepseek-v4-pro -e high
+codex-nim -p danger-full-access -m deepseek-ai/deepseek-v4-pro-0813 -e high
 
 # 7. Skip permissions & approvals directly via flags
 codex-nim --dangerously-bypass-approvals-and-sandbox
@@ -61,7 +61,7 @@ codex-nim -a never
 codex-nim
 codex-nim -y
 codex-nim --choose
-codex-nim -m deepseek-ai/deepseek-v4-pro
+codex-nim -m deepseek-ai/deepseek-v4-pro-0813
 codex-nim -p danger-full-access
 codex-nim --dangerously-bypass-approvals-and-sandbox
 ```

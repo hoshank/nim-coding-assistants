@@ -8,7 +8,8 @@ If you already have **Claude Code**, **Codex CLI**, or **Zed Editor** installed 
 1. [Claude Code (Already Installed)](#1-claude-code-already-installed)
 2. [Codex CLI (Already Installed)](#2-codex-cli-already-installed)
 3. [Zed Editor (Already Installed)](#3-zed-editor-already-installed)
-4. [Toggling Between Native Providers and NVIDIA NIM](#4-toggling-between-native-providers-and-nvidia-nim)
+4. [Aider (Already Installed)](#4-aider-already-installed)
+5. [Toggling Between Native Providers and NVIDIA NIM](#5-toggling-between-native-providers-and-nvidia-nim)
 
 ---
 
@@ -165,8 +166,8 @@ Merge the `language_models` block and `agent.default_model` into your JSON:
             }
           },
           {
-            "name": "deepseek-ai/deepseek-v4-pro",
-            "display_name": "DeepSeek V4 Pro",
+            "name": "deepseek-ai/deepseek-v4-pro-0813",
+            "display_name": "DeepSeek V4 Pro (0813)",
             "max_tokens": 1048500,
             "max_output_tokens": 32768,
             "max_completion_tokens": 200000,
@@ -250,7 +251,55 @@ Merge the `language_models` block and `agent.default_model` into your JSON:
 
 ---
 
-## 4. Toggling Between Native Providers and NVIDIA NIM
+## 4. Aider (Already Installed)
+
+Aider connects directly to OpenAI-compatible endpoints with LiteLLM.
+
+### Option A: Via `~/.aider.conf.yml` (Recommended)
+
+1. Copy the model settings and metadata from this repository to your home directory:
+```bash
+cp /Users/hoshank/code/nim-coding-assistants/config/aider.model.settings.yml ~/.aider.model.settings.yml
+cp /Users/hoshank/code/nim-coding-assistants/config/aider.model.metadata.json ~/.aider.model.metadata.json
+```
+
+2. Create or edit `~/.aider.conf.yml`:
+```yaml
+model: openai/nvidia/nemotron-3-ultra-550b-a55b
+openai-api-base: https://integrate.api.nvidia.com/v1
+model-settings-file: ~/.aider.model.settings.yml
+model-metadata-file: ~/.aider.model.metadata.json
+show-model-warnings: false
+stream: true
+```
+
+3. Export your API keys in `~/.zshrc` or `~/.bashrc`:
+```bash
+export NVIDIA_API_KEY="nvapi-your-key-here"
+export OPENAI_API_KEY="$NVIDIA_API_KEY"
+export OPENAI_API_BASE="https://integrate.api.nvidia.com/v1"
+```
+
+4. Run Aider:
+```bash
+aider
+# Or run with Architect mode:
+aider --architect --editor-model openai/nvidia/nemotron-3-super-120b-a12b
+```
+
+### Option B: Via `aider-nim` Wrapper
+Simply copy or symlink the `aider-nim` launcher into your `$PATH`:
+```bash
+ln -sf /Users/hoshank/code/nim-coding-assistants/scripts/mac-linux/aider-nim.sh ~/.local/bin/aider-nim
+```
+Then run:
+```bash
+aider-nim
+```
+
+---
+
+## 5. Toggling Between Native Providers and NVIDIA NIM
 
 If you frequently switch between Anthropic/OpenAI direct subscriptions and NVIDIA NIM:
 
@@ -288,6 +337,11 @@ codex-nim() {
   CODEX_MODEL="${model}" \
   codex "${@:2}"
 }
+
+# Launch Aider with NVIDIA NIM
+aider-nim() {
+  /Users/hoshank/code/nim-coding-assistants/scripts/mac-linux/aider-nim.sh "$@"
+}
 ```
 
-Now running plain `claude` or `codex` will use your normal default subscriptions, while `claude-nim` and `codex-nim` will route to NVIDIA NIM!
+Now running plain `claude`, `codex`, or `aider` will use your normal default subscriptions, while `claude-nim`, `codex-nim`, and `aider-nim` will route to NVIDIA NIM!

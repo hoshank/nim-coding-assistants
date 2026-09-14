@@ -91,7 +91,7 @@ claude-nim -y                    # or --yes, --quick
 claude-nim --choose              # or -c
 
 # Launch with specific models
-claude-nim --model deepseek-ai/deepseek-v4-pro
+claude-nim --model deepseek-ai/deepseek-v4-pro-0813
 claude-nim -m minimaxai/minimax-m3
 claude-nim -m nvidia/nemotron-3-super-120b-a12b
 
@@ -99,7 +99,7 @@ claude-nim -m nvidia/nemotron-3-super-120b-a12b
 claude-nim --profile dev        # or -P dev
 
 # Combined model + profile + effort
-claude-nim -P dev -m deepseek-ai/deepseek-v4-pro -e high
+claude-nim -P dev -m deepseek-ai/deepseek-v4-pro-0813 -e high
 
 # Run in safe mode (disables auto-skip permissions; manual confirmations)
 claude-nim --safe

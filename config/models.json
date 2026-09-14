@@ -20,8 +20,8 @@
       "recommended_for": "Fast complex reasoning, agentic tool use, planning"
     },
     {
-      "id": "deepseek-ai/deepseek-v4-pro",
-      "name": "DeepSeek V4 Pro",
+      "id": "deepseek-ai/deepseek-v4-pro-0813",
+      "name": "DeepSeek V4 Pro (0813)",
       "provider": "DeepSeek",
       "supports_tools": true,
       "max_tokens": 1048500,
@@ -65,6 +65,16 @@
       "max_tokens": 131072,
       "max_output_tokens": 32768,
       "recommended_for": "Interleaved reasoning, vision, and tool calling"
+    },
+    {
+      "id": "moonshotai/kimi-k3",
+      "name": "Moonshot AI Kimi K3",
+      "provider": "Moonshot AI",
+      "supports_tools": true,
+      "supports_images": true,
+      "max_tokens": 1048576,
+      "max_output_tokens": 32768,
+      "recommended_for": "Long-horizon reasoning, agentic coding, and multimodal intelligence"
     }
   ]
 }
