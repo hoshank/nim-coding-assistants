@@ -17,7 +17,7 @@ Run the setup script from the root of the repository:
 powershell -ExecutionPolicy Bypass -File .\scripts\windows\setup-zed.ps1
 ```
 
-The script automatically creates a timestamped backup of any existing configuration and installs the optimized NVIDIA NIM settings.
+The script automatically creates a timestamped backup of any existing configuration, smartly merges the NVIDIA NIM provider into your settings without overwriting your custom themes or keymaps, and links the `zed` CLI launcher to your PATH.
 
 ---
 
@@ -44,6 +44,9 @@ Zed securely stores provider API keys in your operating system's keychain (macOS
 3. Type and select: **`zed: set api key`**
 4. Select provider: **`Nvidia`**
 5. Enter your NVIDIA API key (starts with `nvapi-...`).
+
+> [!TIP]
+> Zed also automatically reads the `NVIDIA_API_KEY` environment variable if Zed is launched from a terminal where it is set or exported in your shell profile (e.g. `~/.zshrc`).
 
 ---
 

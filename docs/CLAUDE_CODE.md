@@ -43,9 +43,9 @@ Claude Code uses internal aliases for background tasks and subagents. If these a
 
 ---
 
-## 🛡️ Parameter Sanitization
+## 🛡️ Parameter Sanitization & Protocol Translation
 
-Claude Code v2.1+ sends Anthropic beta headers and payload keys such as:
+Claude Code v2.1+ sends Anthropic-specific beta headers and payload keys such as:
 - `output_config`
 - `context_management`
 - `anthropic_beta`
@@ -53,28 +53,63 @@ Claude Code v2.1+ sends Anthropic beta headers and payload keys such as:
 
 NVIDIA NIM's OpenAI validation layer rejects unexpected parameters with `HTTP 400 Validation Error`. The bridge proxy automatically strips these parameters before forwarding while preserving streaming SSE and tool-calling structures.
 
+### 🔄 Streaming Tool-Calling & Anthropic SSE Translation
+Claude Code strictly parses Server-Sent Events (SSE) according to Anthropic's Messages specification. Standard third-party proxies often drop tool-call deltas or stream invalid thinking blocks, leading to `The model's tool call could not be parsed` errors.
+
+The bridge proxy in `proxy.py` solves this with a custom streaming SSE translator:
+- **Thinking / Reasoning Blocks**: NVIDIA NIM models returning reasoning tokens (`reasoning_content`) are translated into valid Anthropic `thinking` blocks (`content_block_start` with `type: "thinking"` followed by `thinking_delta`).
+- **Tool Use Blocks**: When tool calls are triggered, the proxy cleanly closes any active text or thinking block (`content_block_stop`), emits `content_block_start` with `type: "tool_use"`, streams arguments chunk-by-chunk using `input_json_delta`, and finalizes the block.
+- **Stop Reason Resolution**: Sets `stop_reason: "tool_use"` when tool calls are generated, allowing Claude Code to execute tools (such as Bash, Read, Write, Edit) without parse failures.
+- **Name Restoration**: Re-maps truncated tool names (>64 characters) back to their original names.
+
+---
+
+## 🖥️ Interactive TUI Workflow
+
+When you type `claude-nim` without flags in an interactive terminal, it presents a 4-step arrow-key dropdown menu:
+1. **Step 1: Select Model** — Choose between Nemotron 3 Ultra 550B (default), Super 120B, DeepSeek v4 Pro, DeepSeek v4 Flash, MiniMax M3, GLM-5.2, or Inkling.
+2. **Step 2: Select Profile** — Default (`~/.claude`), Clean Vanilla (`~/.claude-profiles/vanilla`), or Dev (`~/.claude-profiles/dev`).
+3. **Step 3: Select Reasoning Effort** — `medium` (default), `high`, or `low`.
+4. **Step 4: Permissions Mode** — `--dangerously-skip-permissions` (default for seamless coding) or Standard Prompts (`--safe`).
+
+To bypass the interactive menu and launch immediately, pass flags (e.g. `-m <model>`) or use `-y` / `--yes`.
+
 ---
 
 ## 🚀 CLI Commands & Options
 
+By default, typing `claude-nim` starts Claude Code with **Nemotron 3 Ultra 550B** and **`--dangerously-skip-permissions`** enabled automatically.
+
 ```bash
-# Start Claude Code with the default model (Nemotron 3 Ultra 550B)
+# Default launch (interactive dropdown menu if run in terminal; defaults to Nemotron 3 Ultra + skip-permissions)
 claude-nim
 
-# Launch with another active model
+# Quick launch (bypass interactive menu with defaults)
+claude-nim -y                    # or --yes, --quick
+
+# Interactive model selector only
+claude-nim --choose              # or -c
+
+# Launch with specific models
 claude-nim --model deepseek-ai/deepseek-v4-pro
-claude-nim --model minimaxai/minimax-m3
+claude-nim -m minimaxai/minimax-m3
+claude-nim -m nvidia/nemotron-3-super-120b-a12b
+
+# Launch with specific profile
+claude-nim --profile dev        # or -P dev
+
+# Combined model + profile + effort
+claude-nim -P dev -m deepseek-ai/deepseek-v4-pro -e high
+
+# Run in safe mode (disables auto-skip permissions; manual confirmations)
+claude-nim --safe
 
 # Run a non-interactive one-off prompt
 claude-nim -p "Explain the main function in src/main.rs"
 
-# Check background proxy status
+# Background proxy management
 claude-nim --status
-
-# View live proxy logs
 claude-nim --logs
-
-# Stop the background proxy
 claude-nim --stop
 ```
 

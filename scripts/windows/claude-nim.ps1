@@ -30,8 +30,13 @@ $Model = $DefaultModel
 $ApiKey = if ($env:NVIDIA_API_KEY) { $env:NVIDIA_API_KEY } else { $EnvMap["NVIDIA_API_KEY"] }
 $BaseUrl = if ($EnvMap["NIM_BASE_URL"]) { $EnvMap["NIM_BASE_URL"] } else { "https://integrate.api.nvidia.com/v1" }
 
+# Run interactive mode by default if user simply types `claude-nim` with no args
+$RunInteractive = ($args.Count -eq 0)
+
 # Parse arguments
 $ClaudeArgs = @()
+$SkipPermissions = $true
+$ChooseModel = $false
 $i = 0
 while ($i -lt $args.Count) {
     $arg = $args[$i]
@@ -40,20 +45,46 @@ while ($i -lt $args.Count) {
             Write-Host "Claude Code with NVIDIA NIM Bridge (Windows)" -ForegroundColor Cyan
             Write-Host "Usage: claude-nim [options] [claude options...]"
             Write-Host "Options:"
-            Write-Host "  --model <name>  Specify the model (default: meta/llama-3.3-70b-instruct)"
-            Write-Host "  --profile <name> Specify profile name (e.g. vanilla, dev)"
-            Write-Host "  --port <port>   Specify proxy port (default: 8000)"
-            Write-Host "  --key <key>     Set NVIDIA API Key"
-            Write-Host "  --stop          Stop background proxy"
-            Write-Host "  --status        Check proxy status"
-            Write-Host "  --logs          View background proxy logs"
+            Write-Host "  --model, -m <name>   Specify the model (default: nvidia/nemotron-3-ultra-550b-a55b)"
+            Write-Host "  --interactive, -i    Run interactive TUI dropdown setup menu"
+            Write-Host "  --yes, -y            Run non-interactively with default options"
+            Write-Host "  --choose, -c         Interactively choose a model from the supported NIM catalog"
+            Write-Host "  --profile, -P <name> Specify profile name (e.g. vanilla, dev - default: ~/.claude)"
+            Write-Host "  --safe               Run with standard permission checks (disables auto-skip)"
+            Write-Host "  --port <port>        Specify proxy port (default: 8000)"
+            Write-Host "  --key <key>          Set NVIDIA API Key"
+            Write-Host "  --stop               Stop background proxy"
+            Write-Host "  --status             Check proxy status"
+            Write-Host "  --logs               View background proxy logs"
+            Write-Host ""
+            Write-Host "Permission Behavior:"
+            Write-Host "  By default, claude-nim automatically includes --dangerously-skip-permissions"
+            Write-Host "  for frictionless pair programming. Use --safe to require manual approvals."
             exit 0
         }
         "-h" {
             Write-Host "Claude Code with NVIDIA NIM Bridge (Windows)" -ForegroundColor Cyan
             exit 0
         }
+        "--interactive" {
+            $RunInteractive = $true
+        }
+        "-i" {
+            $RunInteractive = $true
+        }
+        "--yes" {
+            $RunInteractive = $false
+        }
+        "-y" {
+            $RunInteractive = $false
+        }
+        "--quick" {
+            $RunInteractive = $false
+        }
         "--profile" {
+            $i++; $Profile = $args[$i]
+        }
+        "-P" {
             $i++; $Profile = $args[$i]
         }
         "--model" {
@@ -61,6 +92,26 @@ while ($i -lt $args.Count) {
         }
         "-m" {
             $i++; $Model = $args[$i]
+        }
+        "--choose" {
+            $ChooseModel = $true
+        }
+        "-c" {
+            $ChooseModel = $true
+        }
+        "--safe" {
+            $SkipPermissions = $false
+        }
+        "--no-danger" {
+            $SkipPermissions = $false
+        }
+        "--dangerously-skip-permissions" {
+            $SkipPermissions = $true
+        }
+        "--permission-mode" {
+            $SkipPermissions = $false
+            $ClaudeArgs += $arg
+            $i++; $ClaudeArgs += $args[$i]
         }
         "--port" {
             $i++; $Port = $args[$i]
@@ -111,6 +162,29 @@ while ($i -lt $args.Count) {
         }
     }
     $i++
+}
+
+if ($RunInteractive -or $ChooseModel) {
+    $ConfigTmp = [System.IO.Path]::GetTempFileName()
+    & $PythonBin (Join-Path $ScriptDir "scripts\interactive_menu.py") --app claude --output $ConfigTmp
+    if ($LASTEXITCODE -eq 0 -and (Test-Path $ConfigTmp)) {
+        Get-Content $ConfigTmp | ForEach-Object {
+            $line = $_.Trim()
+            if ($line -and -not $line.StartsWith("#") -and $line.Contains("=")) {
+                $parts = $line.Split("=", 2)
+                $k = $parts[0].Trim()
+                $v = $parts[1].Trim().Trim('"').Trim("'")
+                if ($k -eq "MODEL" -and $v) { $Model = $v }
+                if ($k -eq "PROFILE") { $Profile = $v }
+                if ($k -eq "EFFORT" -and $v) { $Effort = $v }
+                if ($k -eq "SKIP_PERMISSIONS") { $SkipPermissions = ($v -eq "true") }
+            }
+        }
+        Remove-Item $ConfigTmp -Force -ErrorAction SilentlyContinue
+    } elseif ($LASTEXITCODE -ne 0) {
+        Remove-Item $ConfigTmp -Force -ErrorAction SilentlyContinue
+        exit 130
+    }
 }
 
 # Prompt for key if missing
@@ -198,16 +272,35 @@ if ($Profile) {
     $env:CLAUDE_CONFIG_DIR = $ProfileDir
 }
 
+# Automatically add --dangerously-skip-permissions unless disabled with --safe
+if ($SkipPermissions) {
+    $hasDanger = $false
+    foreach ($arg in $ClaudeArgs) {
+        if ($arg -eq "--dangerously-skip-permissions" -or $arg -eq "--permission-mode") {
+            $hasDanger = $true
+            break
+        }
+    }
+    if (-not $hasDanger) {
+        $ClaudeArgs = @("--dangerously-skip-permissions") + $ClaudeArgs
+    }
+}
+
 Write-Host "==========================================================" -ForegroundColor Green
 Write-Host " Launching Claude Code with NVIDIA NIM (Windows)" -ForegroundColor Green
-Write-Host " Model:     $Model"
+Write-Host " Model:       $Model"
 if ($Profile) {
-    Write-Host " Profile:   $Profile ($ProfileDir)" -ForegroundColor Cyan
+    Write-Host " Profile:     $Profile ($ProfileDir)" -ForegroundColor Cyan
 } else {
-    Write-Host " Profile:   default"
+    Write-Host " Profile:     default (~/.claude)"
 }
-Write-Host " Endpoint:  $BaseUrl"
-Write-Host " Proxy:     http://127.0.0.1:$Port"
+if ($SkipPermissions) {
+    Write-Host " Permissions: --dangerously-skip-permissions (auto-approved)" -ForegroundColor Yellow
+} else {
+    Write-Host " Permissions: Standard interactive prompts (--safe)"
+}
+Write-Host " Endpoint:    $BaseUrl"
+Write-Host " Proxy:       http://127.0.0.1:$Port"
 Write-Host "==========================================================" -ForegroundColor Green
 
 & claude @ClaudeArgs

@@ -35,18 +35,30 @@ if [ ! -f ".env" ]; then
     echo "Importing existing settings from ~/.claude/nim/.env..."
     cp "$HOME/.claude/nim/.env" .env
   else
+    if [ -f "env.example" ]; then
+      cp env.example .env
+    elif [ -f ".env.example" ]; then
+      cp .env.example .env
+    fi
+
     echo ""
     echo "----------------------------------------------------------"
     echo " Enter your NVIDIA API Key (from https://build.nvidia.com/)"
     echo "----------------------------------------------------------"
     read -r -p "NVIDIA API Key (nvapi-...): " API_KEY
-    cat << EOF > .env
+    if [ -n "$API_KEY" ]; then
+      if [ -f ".env" ]; then
+        sed -i.bak "s|^NVIDIA_API_KEY=.*|NVIDIA_API_KEY=${API_KEY}|" .env && rm -f .env.bak
+      else
+        cat << EOF > .env
 # NVIDIA NIM Configuration
 NVIDIA_API_KEY="${API_KEY}"
 NIM_BASE_URL="https://integrate.api.nvidia.com/v1"
-NIM_MODEL="meta/llama-3.3-70b-instruct"
+NIM_MODEL="nvidia/nemotron-3-ultra-550b-a55b"
 NIM_PROXY_PORT="8000"
 EOF
+      fi
+    fi
     chmod 600 .env
   fi
 fi

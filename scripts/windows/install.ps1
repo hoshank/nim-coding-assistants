@@ -33,19 +33,34 @@ Write-Host "Installing required Python packages..." -ForegroundColor Cyan
 
 # 3. Configure .env
 $envFile = Join-Path $ScriptDir ".env"
+$envExample = Join-Path $ScriptDir "env.example"
+$dotEnvExample = Join-Path $ScriptDir ".env.example"
+
 if (-not (Test-Path $envFile)) {
+    if (Test-Path $envExample) {
+        Copy-Item $envExample $envFile
+    } elseif (Test-Path $dotEnvExample) {
+        Copy-Item $dotEnvExample $envFile
+    }
+
     Write-Host ""
     Write-Host "----------------------------------------------------------" -ForegroundColor Yellow
     Write-Host " Enter your NVIDIA API Key (from https://build.nvidia.com/)" -ForegroundColor Yellow
     Write-Host "----------------------------------------------------------" -ForegroundColor Yellow
     $apiKey = Read-Host "NVIDIA API Key (nvapi-...)"
+    if ($apiKey) {
+        if (Test-Path $envFile) {
+            (Get-Content $envFile) -replace '^NVIDIA_API_KEY=.*', "NVIDIA_API_KEY=$apiKey" | Set-Content $envFile -Encoding UTF8
+        } else {
 @"
 # NVIDIA NIM Configuration
 NVIDIA_API_KEY="$apiKey"
 NIM_BASE_URL="https://integrate.api.nvidia.com/v1"
-NIM_MODEL="meta/llama-3.3-70b-instruct"
+NIM_MODEL="nvidia/nemotron-3-ultra-550b-a55b"
 NIM_PROXY_PORT="8000"
 "@ | Set-Content $envFile -Encoding UTF8
+        }
+    }
 }
 
 # 4. Create CMD wrappers in user profile bin or WindowsApps

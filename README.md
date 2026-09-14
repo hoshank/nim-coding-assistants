@@ -61,21 +61,26 @@ graph TD
 
 ### 🍎 macOS & 🐧 Linux
 
-#### 1. Clone & Install
+#### 1. Clone & Setup
 ```bash
 git clone https://github.com/hoshank/nim-coding-assistants.git
 cd nim-coding-assistants
 
-# Run installer (sets up virtualenv & global CLI commands)
-./scripts/mac-linux/install.sh
+# Run foolproof setup wizard (creates .venv, configures .env & global launchers)
+./setup.sh
 ```
+
+> 💡 **Where is the configuration file?**
+> - The template is provided as **`env.example`** (visible) and **`.env.example`**.
+> - Running `./setup.sh` automatically creates `.env` and safely prompts for your NVIDIA API key.
+> - To check system health anytime, run: `./setup.sh --doctor`
 
 #### 2. Launch
 ```bash
-# Launch Claude Code (uses Nemotron 3 Ultra 550B default)
+# Launch Claude Code (uses Nemotron 3 Ultra 550B default via local bridge)
 claude-nim
 
-# Launch Codex CLI
+# Launch Codex CLI (connects directly to NVIDIA NIM)
 codex-nim
 
 # Configure Zed Editor automatically
@@ -86,17 +91,17 @@ codex-nim
 
 ### 🪟 Windows (PowerShell or Command Prompt)
 
-#### 1. Clone & Install
-Open PowerShell or Command Prompt:
+#### 1. Clone & Setup
+Double-click `setup.bat` or run in PowerShell / Command Prompt:
 
 ```powershell
 git clone https://github.com/hoshank/nim-coding-assistants.git
 cd nim-coding-assistants
 
-# Run PowerShell installer
-powershell -ExecutionPolicy Bypass -File .\scripts\windows\install.ps1
+# Run Windows setup
+.\setup.bat
 ```
-*(Or in `cmd.exe`: double-click / run `.\scripts\windows\install.bat`)*
+*(Or in PowerShell: `powershell -ExecutionPolicy Bypass -File .\scripts\windows\install.ps1`)*
 
 #### 2. Launch
 Open a new terminal window:
@@ -136,38 +141,66 @@ If you already have **Claude Code**, **Codex CLI**, or **Zed Editor** installed 
 
 ### Claude Code (`claude-nim`)
 
+By default, simply typing `claude-nim` launches Claude Code with **Nemotron 3 Ultra 550B** and automatically enables **`--dangerously-skip-permissions`** for fluid, uninterrupted agentic coding.
+
 ```bash
-# Launch with a specific active model
+# 1. Default launch (Nemotron 3 Ultra 550B + auto-skip permissions)
+claude-nim
+
+# 2. Interactive model chooser
+claude-nim --choose              # or -c
+
+# 3. Model selection options
 claude-nim --model nvidia/nemotron-3-super-120b-a12b
-claude-nim --model deepseek-ai/deepseek-v4-pro
-claude-nim --model minimaxai/minimax-m3
+claude-nim -m deepseek-ai/deepseek-v4-pro
+claude-nim -m minimaxai/minimax-m3
 
-# Launch with an isolated profile (e.g. clean vanilla or dedicated plugin environment)
-claude-nim --profile vanilla
-claude-nim --profile dev
+# 4. Profile selection options (isolated ~/.claude-profiles/<name>)
+claude-nim --profile dev        # or -P dev
+claude-nim --profile vanilla    # clean, plugin-free profile
 
-# Run a non-interactive one-off prompt
+# 5. Combined Profile + Model + Reasoning Effort
+claude-nim -P dev -m deepseek-ai/deepseek-v4-pro --effort high
+
+# 6. Safety & Permission options
+claude-nim --safe               # Disable auto-skip; require manual approvals for all actions
+
+# 7. Non-interactive one-off prompt
 claude-nim -p "Review this PR diff"
 
-# Change local proxy port
-claude-nim --port 8080
-
-# Check background proxy status & logs
-claude-nim --status
-claude-nim --logs
-
-# Stop the background proxy daemon
-claude-nim --stop
+# 8. Proxy management
+claude-nim --status             # Check proxy daemon health
+claude-nim --logs               # View recent proxy logs
+claude-nim --stop               # Stop proxy daemon
+claude-nim --port 8088          # Run on custom proxy port
 ```
-
 
 ### Codex CLI (`codex-nim`)
 
 ```bash
-# Launch with a specific model
-codex-nim --model nvidia/nemotron-3-ultra-550b-a55b
+# 1. Default launch (Nemotron 3 Ultra 550B)
+codex-nim
 
-# Point to custom or self-hosted NIM endpoint
+# 2. Interactive model chooser
+codex-nim --choose              # or -c
+
+# 3. Model selection options
+codex-nim --model nvidia/nemotron-3-super-120b-a12b
+codex-nim -m deepseek-ai/deepseek-v4-pro
+
+# 4. Profile selection options (layers ~/.codex/<profile>.config.toml or built-ins)
+codex-nim --profile danger-full-access    # or -p danger-full-access (bypasses sandbox & approvals)
+codex-nim -p workspace-write              # Sandbox allows local workspace edits
+codex-nim -p read-only                    # Safe read-only inspection
+
+# 5. Combined Profile + Model + Effort
+codex-nim -p danger-full-access -m deepseek-ai/deepseek-v4-pro -e high
+
+# 6. Permission & Approval Bypass Shortcuts
+codex-nim --dangerously-bypass-approvals-and-sandbox
+codex-nim -a never
+
+# 7. Custom or self-hosted endpoint
 codex-nim --url http://localhost:8000/v1
 ```
 
@@ -216,6 +249,12 @@ If PowerShell displays an execution policy error, run with `-ExecutionPolicy Byp
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\windows\install.ps1
 ```
+</details>
+
+<details>
+<summary><b>5. Claude Code tool call parsing error / API failure</b></summary>
+
+If Claude Code fails with `"The model's tool call could not be parsed (retry also failed)"`, ensure you are running `claude-nim` with the latest `proxy.py`. The bridge proxy includes a dedicated Anthropic SSE streaming engine that translates OpenAI reasoning deltas (`reasoning_content` -> `thinking_delta`) and tool calls (`tool_calls` -> `input_json_delta`), cleanly transitioning blocks and preventing dropped tool events.
 </details>
 
 ---
