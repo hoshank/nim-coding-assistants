@@ -7,6 +7,7 @@ $ScriptDir = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $ZedConfigDir = Join-Path $env:APPDATA "Zed"
 $ZedSettingsFile = Join-Path $ZedConfigDir "settings.json"
 $ExampleFile = Join-Path $ScriptDir "config\zed_settings.example.json"
+$MergeScript = Join-Path $ScriptDir "scripts\merge_zed_settings.py"
 
 if (-not (Test-Path $ZedConfigDir)) {
     New-Item -ItemType Directory -Path $ZedConfigDir -Force | Out-Null
@@ -24,10 +25,15 @@ if (Test-Path $ZedSettingsFile) {
     Write-Host "Created backup of existing settings at: $backupFile" -ForegroundColor Yellow
 }
 
-Copy-Item $ExampleFile $ZedSettingsFile -Force
+$VenvPython = Join-Path $ScriptDir ".venv\Scripts\python.exe"
+$pyExe = if (Test-Path $VenvPython) { $VenvPython } else { "python" }
 
-Write-Host ""
-Write-Host "Successfully wrote NVIDIA NIM settings to $ZedSettingsFile!" -ForegroundColor Green
+if (Test-Path $MergeScript) {
+    & $pyExe $MergeScript $ZedSettingsFile $ExampleFile
+} else {
+    Copy-Item $ExampleFile $ZedSettingsFile -Force
+}
+
 Write-Host ""
 Write-Host "----------------------------------------------------------" -ForegroundColor Yellow
 Write-Host " Important: Set your NVIDIA API Key in Zed" -ForegroundColor Yellow

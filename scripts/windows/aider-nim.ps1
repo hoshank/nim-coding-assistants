@@ -142,6 +142,8 @@ if ($RunInteractive -or $ChooseModel) {
                 elseif ($line.StartsWith("AIDER_MODE=")) {
                     $mVal = $line.Substring(11).Trim('"')
                     if ($mVal -eq "architect") { $UseArchitect = $true }
+                    elseif ($mVal -eq "whole") { $EditFormat = "whole" }
+                    elseif ($mVal -eq "diff") { $EditFormat = "diff" }
                 }
                 elseif ($line.StartsWith("AIDER_AUTO_COMMITS=")) {
                     $acVal = $line.Substring(19).Trim('"')
@@ -216,7 +218,25 @@ if (-not $AutoCommits) {
 }
 
 if ($Effort) {
+    if ($PrefixedModel -like "*kimi-k3*" -and $Effort -eq "medium") {
+        $Effort = "high"
+    }
     $ConfigArgs += @("--reasoning-effort", $Effort)
+}
+
+# Verify aider is available
+$aiderCmd = Get-Command aider -ErrorAction SilentlyContinue
+$uvxCmd = Get-Command uvx -ErrorAction SilentlyContinue
+
+if (-not $aiderCmd -and -not $uvxCmd) {
+    Write-Host ""
+    Write-Host "Error: Aider CLI ('aider') was not found in your PATH." -ForegroundColor Red
+    Write-Host "You can install it quickly using pip or uv:" -ForegroundColor Cyan
+    Write-Host "  pip install aider-chat" -ForegroundColor Cyan
+    Write-Host "  or: uv tool install --python 3.12 aider-chat" -ForegroundColor Cyan
+    Write-Host "  or: winget install Aider.Aider" -ForegroundColor Cyan
+    Write-Host ""
+    exit 1
 }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
@@ -232,4 +252,8 @@ Write-Host " Effort:      $Effort"
 Write-Host " Endpoint:    $BaseUrl"
 Write-Host "==========================================================" -ForegroundColor Cyan
 
-& aider @ConfigArgs @AiderArgs
+if ($aiderCmd) {
+    & aider @ConfigArgs @AiderArgs
+} else {
+    & uvx --from aider-chat aider @ConfigArgs @AiderArgs
+}

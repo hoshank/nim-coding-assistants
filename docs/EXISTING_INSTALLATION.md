@@ -9,7 +9,8 @@ If you already have **Claude Code**, **Codex CLI**, or **Zed Editor** installed 
 2. [Codex CLI (Already Installed)](#2-codex-cli-already-installed)
 3. [Zed Editor (Already Installed)](#3-zed-editor-already-installed)
 4. [Aider (Already Installed)](#4-aider-already-installed)
-5. [Toggling Between Native Providers and NVIDIA NIM](#5-toggling-between-native-providers-and-nvidia-nim)
+5. [Pi Coding Agent & NVlabs SoL-Pi (Already Installed)](#5-pi-coding-agent--nvlabs-sol-pi-already-installed)
+6. [Toggling Between Native Providers and NVIDIA NIM](#6-toggling-between-native-providers-and-nvidia-nim)
 
 ---
 
@@ -299,7 +300,54 @@ aider-nim
 
 ---
 
-## 5. Toggling Between Native Providers and NVIDIA NIM
+## 5. Pi Coding Agent & NVlabs SoL-Pi (Already Installed)
+
+Pi natively supports the `nvidia` provider out of the box.
+
+### Step 1: Configure Pi Authentication
+Set your NVIDIA API key in `~/.pi/agent/auth.json`:
+
+```json
+{
+  "nvidia": {
+    "type": "api_key",
+    "key": "nvapi-your-key-here"
+  }
+}
+```
+Or export it into your shell:
+```bash
+export NVIDIA_API_KEY="nvapi-your-key-here"
+```
+
+### Step 2: Configure SoL-Pi Extension
+If you have NVlabs SoL-Pi installed (`pi install git:github.com/NVlabs/SoL-Pi`), configure `~/.pi/agent/sol-pi.json`:
+
+```json
+{
+  "version": 1,
+  "actionFusion": true,
+  "observationPack": true,
+  "evidencePreservingReducer": true,
+  "evidencePreservingReducerProvider": "nvidia",
+  "evidencePreservingReducerModel": "nvidia/nemotron-3-super-120b-a12b",
+  "onlineContextCompact": true,
+  "cacheWriteReadRatio": 12.5
+}
+```
+
+### Step 3: Run Pi with NVIDIA NIM
+```bash
+# Direct command:
+pi --provider nvidia --model nvidia/nemotron-3-super-120b-a12b
+
+# Or using the launcher:
+pi-nim
+```
+
+---
+
+## 6. Toggling Between Native Providers and NVIDIA NIM
 
 If you frequently switch between Anthropic/OpenAI direct subscriptions and NVIDIA NIM:
 

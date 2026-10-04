@@ -1,11 +1,11 @@
-# 🚀 NIM Coding Assistants (Claude Code, Codex CLI, Aider & Zed Editor)
+# 🚀 NIM Coding Assistants (Claude Code, Codex CLI, Aider, Zed Editor & Pi)
 
 [![macOS](https://img.shields.io/badge/macOS-supported-brightgreen?logo=apple)]()
 [![Linux](https://img.shields.io/badge/Linux-supported-brightgreen?logo=linux)]()
 [![Windows](https://img.shields.io/badge/Windows-supported-brightgreen?logo=windows)]()
 [![NVIDIA NIM](https://img.shields.io/badge/NVIDIA-NIM%20Catalog-76B900?logo=nvidia)]()
 
-A lightweight, cross-platform bridge and launcher toolkit to run **Claude Code**, **Codex CLI**, **Aider**, and **Zed Editor** with **NVIDIA NIM** (NVIDIA Cloud API Catalog and self-hosted NIM microservices).
+A lightweight, cross-platform bridge and launcher toolkit to run **Claude Code**, **Codex CLI**, **Aider**, **Zed Editor**, and **Pi Coding Agent (with NVlabs SoL-Pi)** with **NVIDIA NIM** (NVIDIA Cloud API Catalog and self-hosted NIM microservices).
 
 ---
 
@@ -18,6 +18,7 @@ graph TD
         CX["Codex CLI (OpenAI Format)"]
         AID["Aider CLI (OpenAI Compatible)"]
         ZD["Zed Editor (OpenAI Compatible)"]
+        PI["Pi Coding Agent + SoL-Pi (OpenAI Compatible)"]
     end
 
     subgraph Bridge["Local Bridge (proxy.py)"]
@@ -41,6 +42,9 @@ graph TD
 
     ZD -->|Direct OpenAI Format| CAT
     ZD -.->|Direct OpenAI Format| SH
+
+    PI -->|Direct OpenAI Format| CAT
+    PI -.->|Direct OpenAI Format| SH
 ```
 
 ---
@@ -94,6 +98,9 @@ aider-nim
 # Launch Aider in Architect Mode (Nemotron 3 Ultra plans, Super 120B edits)
 aider-nim --architect
 
+# Launch Pi Coding Agent & NVlabs SoL-Pi
+pi-nim
+
 # Configure Zed Editor automatically
 ./scripts/mac-linux/setup-zed.sh
 ```
@@ -130,6 +137,9 @@ aider-nim
 # Launch Aider in Architect Mode
 aider-nim --architect
 
+# Launch Pi Coding Agent & NVlabs SoL-Pi
+pi-nim
+
 # Configure Zed Editor automatically
 powershell -ExecutionPolicy Bypass -File .\scripts\windows\setup-zed.ps1
 ```
@@ -138,7 +148,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\windows\setup-zed.ps1
 
 ## ⚡ Already Have Tools Installed? (Quick Configuration)
 
-If you already have **Claude Code**, **Codex CLI**, **Aider**, or **Zed Editor** installed and just want to configure them to point to NVIDIA NIM without re-installing or overwriting custom configurations, check out:
+If you already have **Claude Code**, **Codex CLI**, **Aider**, **Zed Editor**, or **Pi** installed and just want to configure them to point to NVIDIA NIM without re-installing or overwriting custom configurations, check out:
 
 👉 **[Guide: Configuring Existing Installations for NVIDIA NIM](docs/EXISTING_INSTALLATION.md)**
 
@@ -147,6 +157,7 @@ If you already have **Claude Code**, **Codex CLI**, **Aider**, or **Zed Editor**
 ## 📖 In-Depth Guides
 
 - ⚙️ **[Configuring Existing Installations](docs/EXISTING_INSTALLATION.md)**: Zero-fuss configuration for tools already installed on your system.
+- ⚡ **[Pi & NVlabs SoL-Pi Guide](docs/PI_SOL_PI.md)**: Harness auto-research loops, Action Fusion, and Evidence-Preserving Reducer with NVIDIA NIM.
 - 🤖 **[Aider Integration Guide](docs/AIDER.md)**: Pair programming with Architect mode, 1M context windows, and surgical diff editing.
 - 🧩 **[Zed Editor Setup Guide](docs/ZED_SETUP.md)**: Full instructions for setting up Zed's Assistant panel, inline edit predictions, and setting your API key via `Cmd+Shift+P`.
 - 🤖 **[Claude Code Integration Guide](docs/CLAUDE_CODE.md)**: Details on the Anthropic-to-OpenAI translation layer, parameter stripping (`output_config`, `context_management`), and subagent handling.

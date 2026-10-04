@@ -45,7 +45,9 @@ Usage:
 Options:
   --model, -m <name>   Specify the model to use (default: nvidia/nemotron-3-ultra-550b-a55b)
   --choose, -c         Interactively choose a model from the supported NIM catalog
-  --profile, -P <name> Specify profile name (e.g. vanilla, dev - default: default ~/.claude)
+  --choose-profile, -cp Interactively choose a profile from ~/.claude-profiles
+  --list-profiles, -lp  List all available profiles in ~/.claude-profiles
+  --profile, -P <name> Specify profile name (e.g. claudia, vanilla - default: default ~/.claude)
   --effort, -e <level> Specify reasoning effort (low, medium, high - default: medium)
   --safe               Run with standard permission checks (disables automatic skip-permissions)
   --port <port>        Specify the local proxy port (default: 8000)
@@ -84,6 +86,7 @@ CLAUDE_ARGS=()
 PROFILE="${NIM_PROFILE:-}"
 SKIP_PERMISSIONS=true
 CHOOSE_MODEL=false
+CHOOSE_PROFILE=false
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -99,9 +102,36 @@ while [[ $# -gt 0 ]]; do
       RUN_INTERACTIVE=false
       shift
       ;;
+    --choose-profile|-cp)
+      CHOOSE_PROFILE=true
+      shift
+      ;;
+    --list-profiles|-lp)
+      echo "Available Claude Code Profiles:"
+      echo "  * default (Standard shared profile ~/.claude)"
+      if [ -d "$HOME/.claude-profiles" ]; then
+        for p in "$HOME/.claude-profiles"/*; do
+          if [ -d "$p" ]; then
+            pname="$(basename "$p")"
+            desc=""
+            if [ -f "$p/CLAUDE.md" ]; then
+              first_line="$(head -n 1 "$p/CLAUDE.md" | sed 's/^#* //')"
+              [ -n "$first_line" ] && desc=" ($first_line)"
+            fi
+            echo "  * $pname$desc - $p"
+          fi
+        done
+      fi
+      exit 0
+      ;;
     --profile|-P)
-      PROFILE="$2"
-      shift 2
+      if [ -n "$2" ] && [[ "$2" != -* ]]; then
+        PROFILE="$2"
+        shift 2
+      else
+        CHOOSE_PROFILE=true
+        shift
+      fi
       ;;
     --model|-m)
       MODEL="$2"
@@ -192,9 +222,16 @@ for m in data.get("models", []):
 done
 
 # Run interactive TUI dropdown selection if requested (or when user simply typed claude-nim)
-if [ "$RUN_INTERACTIVE" = true ] || [ "$CHOOSE_MODEL" = true ]; then
+if [ "$RUN_INTERACTIVE" = true ] || [ "$CHOOSE_MODEL" = true ] || [ "$CHOOSE_PROFILE" = true ]; then
   CONFIG_TMP="$(mktemp -t nim_claude_XXXXXX 2>/dev/null || echo "$SCRIPT_DIR/.nim_claude_env")"
-  if "$PYTHON_BIN" "$SCRIPT_DIR/scripts/interactive_menu.py" --app claude --output "$CONFIG_TMP"; then
+  STEP_ARG=()
+  if [ "$CHOOSE_PROFILE" = true ] && [ "$CHOOSE_MODEL" != true ] && [ "$RUN_INTERACTIVE" != true ]; then
+    STEP_ARG=("--step" "profile")
+  elif [ "$CHOOSE_MODEL" = true ] && [ "$CHOOSE_PROFILE" != true ] && [ "$RUN_INTERACTIVE" != true ]; then
+    STEP_ARG=("--step" "model")
+  fi
+
+  if "$PYTHON_BIN" "$SCRIPT_DIR/scripts/interactive_menu.py" --app claude "${STEP_ARG[@]}" --output "$CONFIG_TMP"; then
     if [ -f "$CONFIG_TMP" ]; then
       # shellcheck disable=SC1090
       source "$CONFIG_TMP"

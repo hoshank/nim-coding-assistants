@@ -49,7 +49,9 @@ while ($i -lt $args.Count) {
             Write-Host "  --interactive, -i    Run interactive TUI dropdown setup menu"
             Write-Host "  --yes, -y            Run non-interactively with default options"
             Write-Host "  --choose, -c         Interactively choose a model from the supported NIM catalog"
-            Write-Host "  --profile, -P <name> Specify profile name (e.g. vanilla, dev - default: ~/.claude)"
+            Write-Host "  --choose-profile, -cp Interactively choose a profile from ~/.claude-profiles"
+            Write-Host "  --list-profiles, -lp  List all available profiles in ~/.claude-profiles"
+            Write-Host "  --profile, -P <name> Specify profile name (e.g. claudia, vanilla - default: ~/.claude)"
             Write-Host "  --safe               Run with standard permission checks (disables auto-skip)"
             Write-Host "  --port <port>        Specify proxy port (default: 8000)"
             Write-Host "  --key <key>          Set NVIDIA API Key"
@@ -81,11 +83,61 @@ while ($i -lt $args.Count) {
         "--quick" {
             $RunInteractive = $false
         }
+        "--choose-profile" {
+            $ChooseProfile = $true
+        }
+        "-cp" {
+            $ChooseProfile = $true
+        }
+        "--list-profiles" {
+            $ProfilesDir = Join-Path $env:USERPROFILE ".claude-profiles"
+            Write-Host "Available Claude Code Profiles:" -ForegroundColor Cyan
+            Write-Host "  * default (Standard shared profile ~/.claude)"
+            if (Test-Path $ProfilesDir) {
+                Get-ChildItem $ProfilesDir -Directory | ForEach-Object {
+                    $pName = $_.Name
+                    $claudeMd = Join-Path $_.FullName "CLAUDE.md"
+                    $desc = ""
+                    if (Test-Path $claudeMd) {
+                        $firstLine = (Get-Content $claudeMd -TotalCount 1 -ErrorAction SilentlyContinue)
+                        if ($firstLine) { $desc = " ($($firstLine.Trim('# ')))" }
+                    }
+                    Write-Host "  * $pName$desc - $($_.FullName)"
+                }
+            }
+            exit 0
+        }
+        "-lp" {
+            $ProfilesDir = Join-Path $env:USERPROFILE ".claude-profiles"
+            Write-Host "Available Claude Code Profiles:" -ForegroundColor Cyan
+            Write-Host "  * default (Standard shared profile ~/.claude)"
+            if (Test-Path $ProfilesDir) {
+                Get-ChildItem $ProfilesDir -Directory | ForEach-Object {
+                    $pName = $_.Name
+                    $claudeMd = Join-Path $_.FullName "CLAUDE.md"
+                    $desc = ""
+                    if (Test-Path $claudeMd) {
+                        $firstLine = (Get-Content $claudeMd -TotalCount 1 -ErrorAction SilentlyContinue)
+                        if ($firstLine) { $desc = " ($($firstLine.Trim('# ')))" }
+                    }
+                    Write-Host "  * $pName$desc - $($_.FullName)"
+                }
+            }
+            exit 0
+        }
         "--profile" {
-            $i++; $Profile = $args[$i]
+            if ($i + 1 -lt $args.Count -and -not $args[$i+1].StartsWith("-")) {
+                $i++; $Profile = $args[$i]
+            } else {
+                $ChooseProfile = $true
+            }
         }
         "-P" {
-            $i++; $Profile = $args[$i]
+            if ($i + 1 -lt $args.Count -and -not $args[$i+1].StartsWith("-")) {
+                $i++; $Profile = $args[$i]
+            } else {
+                $ChooseProfile = $true
+            }
         }
         "--model" {
             $i++; $Model = $args[$i]
@@ -164,9 +216,10 @@ while ($i -lt $args.Count) {
     $i++
 }
 
-if ($RunInteractive -or $ChooseModel) {
+if ($RunInteractive -or $ChooseModel -or $ChooseProfile) {
+    $StepArg = if ($ChooseProfile) { @("--step", "profile") } elseif ($ChooseModel) { @("--step", "model") } else { @("--step", "all") }
     $ConfigTmp = [System.IO.Path]::GetTempFileName()
-    & $PythonBin (Join-Path $ScriptDir "scripts\interactive_menu.py") --app claude --output $ConfigTmp
+    & $PythonBin (Join-Path $ScriptDir "scripts\interactive_menu.py") --app claude --output $ConfigTmp @StepArg
     if ($LASTEXITCODE -eq 0 -and (Test-Path $ConfigTmp)) {
         Get-Content $ConfigTmp | ForEach-Object {
             $line = $_.Trim()

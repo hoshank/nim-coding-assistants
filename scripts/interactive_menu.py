@@ -14,6 +14,12 @@ from pathlib import Path
 from typing import List, Dict, Any, Optional, Tuple
 
 # ANSI color and styling codes
+if sys.platform == "win32":
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    if hasattr(sys.stderr, "reconfigure"):
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
 BOLD = "\033[1m"
 DIM = "\033[2m"
 CYAN = "\033[36m"
@@ -201,9 +207,35 @@ def prompt_custom_input(prompt_text: str, default_val: str = "") -> str:
     val = input(f"  {YELLOW}❯ {prompt_text}{RESET} ").strip()
     return val if val else default_val
 
+def load_claude_profiles() -> List[Tuple[str, str]]:
+    """Scan ~/.claude-profiles dynamically and return all existing profiles."""
+    home = Path.home()
+    profiles_dir = home / ".claude-profiles"
+    options: List[Tuple[str, str]] = [
+        ("default", "Standard shared profile ~/.claude")
+    ]
+    if profiles_dir.is_dir():
+        for entry in sorted(profiles_dir.iterdir()):
+            if entry.is_dir() and not entry.name.startswith("."):
+                desc = f"Isolated profile ~/.claude-profiles/{entry.name}"
+                claude_md = entry / "CLAUDE.md"
+                if claude_md.is_file():
+                    try:
+                        lines = [line.strip() for line in claude_md.read_text(encoding="utf-8", errors="ignore").splitlines() if line.strip()]
+                        if lines:
+                            title = lines[0].lstrip("# ").strip()
+                            desc = f"{title} | ~/.claude-profiles/{entry.name}"
+                    except Exception:
+                        pass
+                options.append((entry.name, desc))
+    
+    options.append(("[ Create Custom Profile ]", "Enter your own custom isolated profile name"))
+    return options
+
 def main():
     parser = argparse.ArgumentParser(description="Interactive Launcher Menu for NIM Coding Assistants")
-    parser.add_argument("--app", choices=["claude", "codex", "aider"], default="claude", help="Target assistant")
+    parser.add_argument("--app", choices=["claude", "codex", "aider", "pi"], default="claude", help="Target assistant")
+    parser.add_argument("--step", choices=["all", "model", "profile"], default="all", help="Selection step: all, model, or profile")
     parser.add_argument("--output", type=str, help="Path to write chosen shell environment variables")
     args = parser.parse_args()
 
@@ -211,6 +243,8 @@ def main():
         app_name = "Claude Code"
     elif args.app == "codex":
         app_name = "Codex CLI"
+    elif args.app == "pi":
+        app_name = "Pi / SoL-Pi"
     else:
         app_name = "Aider Chat"
 
@@ -222,140 +256,163 @@ def main():
     print("╚══════════════════════════════════════════════════════════════════════╝")
     print(f"{RESET}")
 
-    # 1. Model Selection
-    model_options = load_models_from_config()
-    model_idx = interactive_select(
-        title="Step 1: Select NVIDIA NIM Model",
-        subtitle="Choose the model powering your coding session (Enter for default):",
-        options=model_options,
-        default_index=0
-    )
-    chosen_model = model_options[model_idx][0]
-    if chosen_model == "[ Enter Custom Model ID ]":
-        chosen_model = prompt_custom_input("Enter NVIDIA NIM Model ID (e.g. meta/llama-3.3-70b-instruct):", "nvidia/nemotron-3-ultra-550b-a55b")
-        print(f"  {GREEN}✔ Custom Model Set:{RESET} {BOLD}{chosen_model}{RESET}\n")
-
-    # 2. Profile / Workflow Selection
+    chosen_model = "nvidia/nemotron-3-ultra-550b-a55b"
     chosen_profile = ""
-    chosen_aider_mode = "diff"
-    if args.app == "claude":
-        profile_options = [
-            ("default", "Standard shared profile ~/.claude"),
-            ("dev", "Dedicated development profile ~/.claude-profiles/dev"),
-            ("vanilla", "Clean, plugin-free environment ~/.claude-profiles/vanilla"),
-            ("[ Create Custom Profile ]", "Enter your own custom isolated profile name"),
-        ]
-        profile_idx = interactive_select(
-            title="Step 2: Select Profile",
-            subtitle="Isolate settings, history, and MCP plugins per workflow:",
-            options=profile_options,
-            default_index=0
-        )
-        chosen_profile = profile_options[profile_idx][0]
-        if chosen_profile == "[ Create Custom Profile ]":
-            chosen_profile = prompt_custom_input("Enter new profile name (e.g. work, project-a):", "custom")
-            print(f"  {GREEN}✔ Custom Profile Created:{RESET} {BOLD}{chosen_profile}{RESET}\n")
-        elif chosen_profile == "default":
-            chosen_profile = ""
-    elif args.app == "codex":
-        # Codex profiles
-        profile_options = [
-            ("danger-full-access", "Full sandbox access & auto-approved commands [Recommended]"),
-            ("workspace-write", "Sandbox write access confined to current workspace"),
-            ("read-only", "Safe inspection & read-only tools"),
-            ("[ Custom Profile ]", "Load custom ~/.codex/<name>.config.toml"),
-        ]
-        profile_idx = interactive_select(
-            title="Step 2: Select Codex Profile / Sandbox Mode",
-            subtitle="Configure execution sandboxing and approval policies:",
-            options=profile_options,
-            default_index=0
-        )
-        chosen_profile = profile_options[profile_idx][0]
-        if chosen_profile == "[ Custom Profile ]":
-            chosen_profile = prompt_custom_input("Enter custom profile name from ~/.codex/<name>.config.toml:", "nim")
-            print(f"  {GREEN}✔ Profile Set:{RESET} {BOLD}{chosen_profile}{RESET}\n")
-    else:
-        # Aider Workflow Modes
-        aider_modes = [
-            ("architect", "Architect Mode (Dual-model: Nemotron 3 Ultra plans, Super 120B edits) [Recommended]"),
-            ("diff", "Standard Pair Programming (Diff search/replace format)"),
-            ("whole", "Whole File Editing (Rewrites full files)"),
-        ]
-        mode_idx = interactive_select(
-            title="Step 2: Select Aider Workflow Mode",
-            subtitle="Choose between architect dual-model reasoning or direct diff editing:",
-            options=aider_modes,
-            default_index=0
-        )
-        chosen_aider_mode = aider_modes[mode_idx][0]
-
-    # 3. Reasoning Effort
-    effort_options = [
-        ("medium", "Balanced reasoning latency and depth (Default)"),
-        ("high", "Maximum reasoning effort for deep architecture & math"),
-        ("low", "Fast low-latency responses for quick completions"),
-    ]
-    effort_idx = interactive_select(
-        title="Step 3: Select Reasoning Effort",
-        subtitle="Control the depth of reasoning tokens allocated to the model:",
-        options=effort_options,
-        default_index=0
-    )
-    chosen_effort = effort_options[effort_idx][0]
-
-    # 4. Permission / Approval / Git Handling
+    chosen_effort = "medium"
     skip_permissions = True
+    chosen_aider_mode = "diff"
     codex_flags = []
     aider_auto_commits = True
 
-    if args.app == "claude":
-        perm_options = [
-            ("Auto-approve all permissions (--dangerously-skip-permissions)", "Frictionless pair programming without continuous prompts [Recommended]"),
-            ("Standard safe mode (--safe)", "Require manual confirmation for file writes and shell execution"),
-        ]
-        perm_idx = interactive_select(
-            title="Step 4: Permission Mode",
-            subtitle="Choose whether Claude Code asks before every command/edit:",
-            options=perm_options,
+    # 1. Model Selection
+    if args.step in ("all", "model"):
+        model_options = load_models_from_config()
+        model_idx = interactive_select(
+            title="Step 1: Select NVIDIA NIM Model",
+            subtitle="Choose the model powering your coding session (Enter for default):",
+            options=model_options,
             default_index=0
         )
-        skip_permissions = (perm_idx == 0)
-    elif args.app == "codex":
-        # Codex approval & sandbox policies
-        perm_options = [
-            ("Bypass all approvals & sandbox (--dangerously-bypass-approvals-and-sandbox)", "Skip all confirmation prompts and execute without sandboxing [Recommended]"),
-            ("Never ask approval, keep sandbox active (-a never)", "Never prompt for approval, but enforce workspace sandbox confinement"),
-            ("Auto-review commands in workspace (--approve-for-me)", "Auto-review tool execution using workspace-write sandbox"),
-            ("Standard manual confirmation prompts", "Prompt for human approval before executing any tool or command"),
-        ]
-        perm_idx = interactive_select(
-            title="Step 4: Permission & Approval Mode",
-            subtitle="Control how Codex authorizes tool execution and shell actions:",
-            options=perm_options,
-            default_index=0
-        )
-        if perm_idx == 0:
-            codex_flags = ["--dangerously-bypass-approvals-and-sandbox"]
-        elif perm_idx == 1:
-            codex_flags = ["-a", "never"]
-        elif perm_idx == 2:
-            codex_flags = ["--approve-for-me"]
+        chosen_model = model_options[model_idx][0]
+        if chosen_model == "[ Enter Custom Model ID ]":
+            chosen_model = prompt_custom_input("Enter NVIDIA NIM Model ID (e.g. meta/llama-3.3-70b-instruct):", "nvidia/nemotron-3-ultra-550b-a55b")
+            print(f"  {GREEN}✔ Custom Model Set:{RESET} {BOLD}{chosen_model}{RESET}\n")
+
+    # 2. Profile / Workflow Selection
+    if args.step in ("all", "profile"):
+        step_num = "Step 2" if args.step == "all" else "Step 1"
+        if args.app == "claude":
+            profile_options = load_claude_profiles()
+            profile_idx = interactive_select(
+                title=f"{step_num}: Select Profile",
+                subtitle="Choose existing profile or create an isolated environment:",
+                options=profile_options,
+                default_index=0
+            )
+            chosen_profile = profile_options[profile_idx][0]
+            if chosen_profile == "[ Create Custom Profile ]":
+                chosen_profile = prompt_custom_input("Enter new profile name (e.g. work, project-a):", "custom")
+                print(f"  {GREEN}✔ Custom Profile Created:{RESET} {BOLD}{chosen_profile}{RESET}\n")
+            elif chosen_profile == "default":
+                chosen_profile = ""
+        elif args.app == "codex":
+            # Codex profiles
+            profile_options = [
+                ("danger-full-access", "Full sandbox access & auto-approved commands [Recommended]"),
+                ("workspace-write", "Sandbox write access confined to current workspace"),
+                ("read-only", "Safe inspection & read-only tools"),
+                ("[ Custom Profile ]", "Load custom ~/.codex/<name>.config.toml"),
+            ]
+            profile_idx = interactive_select(
+                title=f"{step_num}: Select Codex Profile / Sandbox Mode",
+                subtitle="Configure execution sandboxing and approval policies:",
+                options=profile_options,
+                default_index=0
+            )
+            chosen_profile = profile_options[profile_idx][0]
+            if chosen_profile == "[ Custom Profile ]":
+                chosen_profile = prompt_custom_input("Enter custom profile name from ~/.codex/<name>.config.toml:", "nim")
+                print(f"  {GREEN}✔ Profile Set:{RESET} {BOLD}{chosen_profile}{RESET}\n")
+        elif args.app == "pi":
+            pi_profiles = [
+                ("default", "Standard full access with all SoL-Pi harness mechanisms [Recommended]"),
+                ("read-only", "Safe inspection & read-only tools (read, grep, find, ls)"),
+            ]
+            prof_idx = interactive_select(
+                title=f"{step_num}: Select Pi / SoL-Pi Profile",
+                subtitle="Configure assistant capabilities and permissions:",
+                options=pi_profiles,
+                default_index=0
+            )
+            chosen_profile = pi_profiles[prof_idx][0]
         else:
-            codex_flags = []
-    else:
-        # Aider Git Commit Handling
-        git_options = [
-            ("Auto-commit edits", "Automatically commit each successful AI edit with descriptive commit message [Recommended]"),
-            ("Manual git commits (--no-auto-commits)", "Leave modified files unstaged for manual review"),
+            # Aider Workflow Modes
+            aider_modes = [
+                ("architect", "Architect Mode (Dual-model: Nemotron 3 Ultra plans, Super 120B edits) [Recommended]"),
+                ("diff", "Standard Pair Programming (Diff search/replace format)"),
+                ("whole", "Whole File Editing (Rewrites full files)"),
+            ]
+            mode_idx = interactive_select(
+                title=f"{step_num}: Select Aider Workflow Mode",
+                subtitle="Choose between architect dual-model reasoning or direct diff editing:",
+                options=aider_modes,
+                default_index=0
+            )
+            chosen_aider_mode = aider_modes[mode_idx][0]
+
+    # 3. Reasoning Effort
+    if args.step == "all":
+        effort_options = [
+            ("medium", "Balanced reasoning latency and depth (Default)"),
+            ("high", "Maximum reasoning effort for deep architecture & math"),
+            ("low", "Fast low-latency responses for quick completions"),
         ]
-        git_idx = interactive_select(
-            title="Step 4: Git Auto-Commit Behavior",
-            subtitle="Choose how Aider interacts with your Git repository:",
-            options=git_options,
+        effort_idx = interactive_select(
+            title="Step 3: Select Reasoning Effort",
+            subtitle="Control the depth of reasoning tokens allocated to the model:",
+            options=effort_options,
             default_index=0
         )
-        aider_auto_commits = (git_idx == 0)
+        chosen_effort = effort_options[effort_idx][0]
+
+        # 4. Permission / Approval / Git Handling
+        if args.app == "claude":
+            perm_options = [
+                ("Auto-approve all permissions (--dangerously-skip-permissions)", "Frictionless pair programming without continuous prompts [Recommended]"),
+                ("Standard safe mode (--safe)", "Require manual confirmation for file writes and shell execution"),
+            ]
+            perm_idx = interactive_select(
+                title="Step 4: Permission Mode",
+                subtitle="Choose whether Claude Code asks before every command/edit:",
+                options=perm_options,
+                default_index=0
+            )
+            skip_permissions = (perm_idx == 0)
+        elif args.app == "codex":
+            perm_options = [
+                ("Bypass all approvals & sandbox (--dangerously-bypass-approvals-and-sandbox)", "Skip all confirmation prompts and execute without sandboxing [Recommended]"),
+                ("Never ask approval, keep sandbox active (-a never)", "Never prompt for approval, but enforce workspace sandbox confinement"),
+                ("Auto-review commands in workspace (--approve-for-me)", "Auto-review tool execution using workspace-write sandbox"),
+                ("Standard manual confirmation prompts", "Prompt for human approval before executing any tool or command"),
+            ]
+            perm_idx = interactive_select(
+                title="Step 4: Permission & Approval Mode",
+                subtitle="Control how Codex authorizes tool execution and shell actions:",
+                options=perm_options,
+                default_index=0
+            )
+            if perm_idx == 0:
+                codex_flags = ["--dangerously-bypass-approvals-and-sandbox"]
+            elif perm_idx == 1:
+                codex_flags = ["-a", "never"]
+            elif perm_idx == 2:
+                codex_flags = ["--approve-for-me"]
+            else:
+                codex_flags = []
+        elif args.app == "pi":
+            pi_options = [
+                ("Auto-approve project files (--approve)", "Trust project-local tools and SoL-Pi configuration [Recommended]"),
+                ("Require manual approval", "Prompt for manual confirmation on project-local extensions"),
+            ]
+            pi_idx = interactive_select(
+                title="Step 4: Project Trust & Approval Mode",
+                subtitle="Choose whether Pi auto-approves project-local files and extensions:",
+                options=pi_options,
+                default_index=0
+            )
+            pi_auto_approve = (pi_idx == 0)
+        else:
+            git_options = [
+                ("Auto-commit edits", "Automatically commit each successful AI edit with descriptive commit message [Recommended]"),
+                ("Manual git commits (--no-auto-commits)", "Leave modified files unstaged for manual review"),
+            ]
+            git_idx = interactive_select(
+                title="Step 4: Git Auto-Commit Behavior",
+                subtitle="Choose whether Aider automatically creates git commits after editing:",
+                options=git_options,
+                default_index=0
+            )
+            aider_auto_commits = (git_idx == 0)
 
     print(f"{GREEN}{BOLD}✓ Configuration confirmed. Triggering {app_name}...{RESET}\n")
 
@@ -372,6 +429,9 @@ def main():
             elif args.app == "codex":
                 flags_str = " ".join(codex_flags)
                 f.write(f'CODEX_PERM_FLAGS="{flags_str}"\n')
+            elif args.app == "pi":
+                f.write(f'THINKING="{chosen_effort}"\n')
+                f.write(f'PI_AUTO_APPROVE="{"true" if pi_auto_approve else "false"}"\n')
             else:
                 f.write(f'AIDER_MODE="{chosen_aider_mode}"\n')
                 f.write(f'AIDER_AUTO_COMMITS="{"true" if aider_auto_commits else "false"}"\n')

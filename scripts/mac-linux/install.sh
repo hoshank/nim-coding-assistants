@@ -68,9 +68,11 @@ chmod +x proxy.py
 chmod +x scripts/mac-linux/claude-nim.sh
 chmod +x scripts/mac-linux/codex-nim.sh
 chmod +x scripts/mac-linux/aider-nim.sh
+chmod +x scripts/mac-linux/pi-nim.sh
 chmod +x scripts/mac-linux/install.sh
 chmod +x scripts/mac-linux/setup-zed.sh
 chmod +x scripts/mac-linux/setup-aider.sh
+chmod +x scripts/mac-linux/setup-sol-pi.sh
 
 # 5. Create global symlinks in ~/.local/bin
 mkdir -p "$HOME/.local/bin"
@@ -78,6 +80,13 @@ mkdir -p "$HOME/.local/bin"
 ln -sf "$SCRIPT_DIR/scripts/mac-linux/claude-nim.sh" "$HOME/.local/bin/claude-nim"
 ln -sf "$SCRIPT_DIR/scripts/mac-linux/codex-nim.sh" "$HOME/.local/bin/codex-nim"
 ln -sf "$SCRIPT_DIR/scripts/mac-linux/aider-nim.sh" "$HOME/.local/bin/aider-nim"
+ln -sf "$SCRIPT_DIR/scripts/mac-linux/pi-nim.sh" "$HOME/.local/bin/pi-nim"
+
+# 6. Configure Pi & SoL-Pi if pi is installed
+if command -v pi &>/dev/null; then
+  echo "Configuring Pi Coding Agent & SoL-Pi for NVIDIA NIM..."
+  "$SCRIPT_DIR/scripts/mac-linux/setup-sol-pi.sh" "$NIM_MODEL"
+fi
 
 echo ""
 echo "=========================================================="
@@ -87,6 +96,7 @@ echo "Installed commands in ~/.local/bin:"
 echo "  • claude-nim  -> Run Claude Code using NVIDIA NIM"
 echo "  • codex-nim   -> Run Codex CLI using NVIDIA NIM"
 echo "  • aider-nim   -> Run Aider Pair Programmer using NVIDIA NIM"
+echo "  • pi-nim      -> Run Pi Coding Agent & SoL-Pi using NVIDIA NIM"
 echo ""
 echo "Make sure ~/.local/bin is in your PATH. If needed, add to ~/.zshrc or ~/.bashrc:"
 echo '  export PATH="$HOME/.local/bin:$PATH"'
@@ -95,4 +105,5 @@ echo "Try running:"
 echo "  claude-nim --help"
 echo "  codex-nim --help"
 echo "  aider-nim --help"
+echo "  pi-nim --help"
 echo "=========================================================="
