@@ -13,7 +13,7 @@ Unlike Claude Code, **Codex CLI** natively supports OpenAI-compatible endpoints 
 ## 🖥️ Interactive TUI Workflow
 
 When you type `codex-nim` without flags in an interactive terminal, it presents a 4-step arrow-key dropdown menu:
-1. **Step 1: Select Model** — Choose between Nemotron 3 Ultra 550B (default), Super 120B, DeepSeek v4 Pro, DeepSeek v4 Flash, MiniMax M3, GLM-5.2, or Inkling.
+1. **Step 1: Select Model** — Choose between Nemotron 3 Ultra 550B (default), Super 120B, DeepSeek V4.1 Flash, MiniMax M3, GLM 5.3 Flash, or Inkling.
 2. **Step 2: Select Profile** — Default (`default`), Danger Full Access (`danger-full-access`), Workspace Write (`workspace-write`), or Read-Only (`read-only`).
 3. **Step 3: Select Reasoning Effort** — `medium` (default), `high`, or `low`.
 4. **Step 4: Permissions & Sandboxing Mode**:

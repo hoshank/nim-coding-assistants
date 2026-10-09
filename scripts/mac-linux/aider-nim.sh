@@ -70,10 +70,9 @@ All other arguments are forwarded directly to `aider`.
 Supported NIM Catalog Models:
   - nvidia/nemotron-3-ultra-550b-a55b (Recommended default)
   - nvidia/nemotron-3-super-120b-a12b (High-efficiency reasoning & editor)
-  - deepseek-ai/deepseek-v4-pro-0813  (Advanced coding & refactoring)
-  - deepseek-ai/deepseek-v4-flash-0731(Low-latency completions)
+  - deepseek-ai/deepseek-v4.1-flash   (Low-latency completions)
   - minimaxai/minimax-m3              (Vision & UI understanding)
-  - z-ai/glm-5.2                      (General coding & reasoning)
+  - z-ai/glm-5.3-flash                (General coding & reasoning)
   - thinkingmachines/inkling          (Interleaved reasoning & vision)
   - moonshotai/kimi-k3                (Long-horizon reasoning & coding)
 EOF
@@ -141,6 +140,10 @@ while [[ $# -gt 0 ]]; do
     --url)
       BASE_URL="$2"
       shift 2
+      ;;
+    --update-models)
+      "$SCRIPT_DIR/scripts/mac-linux/update-models.sh" --sync
+      exit 0
       ;;
     *)
       AIDER_ARGS+=("$1")

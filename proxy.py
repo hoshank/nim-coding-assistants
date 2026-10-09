@@ -32,6 +32,17 @@ ANTHROPIC_ADAPTER = LiteLLMMessagesToCompletionTransformationHandler.anthropic_m
 
 app = FastAPI(title="Claude Code NVIDIA NIM Bridge")
 
+# Automatic model redirects for deprecated or sunset NIM models
+MODEL_ALIASES: Dict[str, str] = {
+    # Automatic model redirects for deprecated or sunset NIM models
+    "deepseek-ai/deepseek-v4-flash": "deepseek-ai/deepseek-v4.1-flash",
+    "deepseek-ai/deepseek-v4-flash-0731": "deepseek-ai/deepseek-v4.1-flash",
+    "deepseek-ai/deepseek-v4-pro": "deepseek-ai/deepseek-v4.1-flash",
+    "deepseek-ai/deepseek-v4-pro-0813": "deepseek-ai/deepseek-v4.1-flash",
+    "minimaxai/minimax-m3": "meta/llama-3.2-11b-vision-instruct",
+    "thinkingmachines/inkling": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning",
+}
+
 def get_env() -> Dict[str, str]:
     """Load settings from environment variables or local .env file."""
     env: Dict[str, str] = {}
@@ -89,11 +100,9 @@ async def list_models():
         available = [
             {"id": "nvidia/nemotron-3-ultra-550b-a55b", "object": "model"},
             {"id": "nvidia/nemotron-3-super-120b-a12b", "object": "model"},
-            {"id": "deepseek-ai/deepseek-v4-pro-0813", "object": "model"},
-            {"id": "deepseek-ai/deepseek-v4-pro", "object": "model"},
-            {"id": "deepseek-ai/deepseek-v4-flash-0731", "object": "model"},
+            {"id": "deepseek-ai/deepseek-v4.1-flash", "object": "model"},
             {"id": "minimaxai/minimax-m3", "object": "model"},
-            {"id": "z-ai/glm-5.2", "object": "model"},
+            {"id": "z-ai/glm-5.3-flash", "object": "model"},
             {"id": "thinkingmachines/inkling", "object": "model"},
             {"id": "moonshotai/kimi-k3", "object": "model"}
         ]
@@ -210,6 +219,11 @@ async def messages_endpoint(request: Request):
         model_to_use = default_model
     else:
         model_to_use = requested_model
+
+    if model_to_use in MODEL_ALIASES:
+        migrated = MODEL_ALIASES[model_to_use]
+        print(f"[NIM Proxy] Model '{model_to_use}' deprecated/aliased -> redirecting to '{migrated}'", flush=True)
+        model_to_use = migrated
 
     print(f"[NIM Proxy] Received request for '{requested_model}' -> forwarding to NIM model '{model_to_use}' at {api_base}", flush=True)
 

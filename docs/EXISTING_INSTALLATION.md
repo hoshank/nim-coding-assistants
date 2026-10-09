@@ -181,8 +181,8 @@ Merge the `language_models` block and `agent.default_model` into your JSON:
             }
           },
           {
-            "name": "deepseek-ai/deepseek-v4-flash-0731",
-            "display_name": "DeepSeek V4 Flash (0731)",
+            "name": "deepseek-ai/deepseek-v4.1-flash",
+            "display_name": "DeepSeek V4.1 Flash",
             "max_tokens": 1048576,
             "max_output_tokens": 32768,
             "max_completion_tokens": 200000,
@@ -209,8 +209,8 @@ Merge the `language_models` block and `agent.default_model` into your JSON:
             }
           },
           {
-            "name": "z-ai/glm-5.2",
-            "display_name": "GLM 5.2",
+            "name": "z-ai/glm-5.3-flash",
+            "display_name": "GLM 5.3 Flash",
             "max_tokens": 1048576,
             "max_output_tokens": 32768,
             "max_completion_tokens": 200000,

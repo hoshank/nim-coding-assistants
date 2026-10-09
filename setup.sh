@@ -302,6 +302,8 @@ echo ""
 # ------------------------------------------------------------------------------
 echo -e "${CYAN}▶ Step 5: Linking CLI launcher commands...${NC}"
 chmod +x "$SCRIPT_DIR/proxy.py"
+chmod +x "$SCRIPT_DIR/scripts/update_models.py"
+chmod +x "$SCRIPT_DIR/scripts/mac-linux/update-models.sh"
 chmod +x "$SCRIPT_DIR/scripts/mac-linux/claude-nim.sh"
 chmod +x "$SCRIPT_DIR/scripts/mac-linux/codex-nim.sh"
 chmod +x "$SCRIPT_DIR/scripts/mac-linux/aider-nim.sh"
@@ -314,11 +316,13 @@ mkdir -p "$BIN_DIR"
 ln -sf "$SCRIPT_DIR/scripts/mac-linux/claude-nim.sh" "$BIN_DIR/claude-nim"
 ln -sf "$SCRIPT_DIR/scripts/mac-linux/codex-nim.sh" "$BIN_DIR/codex-nim"
 ln -sf "$SCRIPT_DIR/scripts/mac-linux/aider-nim.sh" "$BIN_DIR/aider-nim"
+ln -sf "$SCRIPT_DIR/scripts/mac-linux/update-models.sh" "$BIN_DIR/nim-update-models"
 
 echo -e "  ${GREEN}✔ Created global symlinks in $BIN_DIR:${NC}"
-echo "    • claude-nim -> Launch Claude Code through NVIDIA NIM bridge"
-echo "    • codex-nim  -> Launch Codex CLI connected directly to NVIDIA NIM"
-echo "    • aider-nim  -> Launch Aider with Architect mode & NIM diff editing"
+echo "    • claude-nim        -> Launch Claude Code through NVIDIA NIM bridge"
+echo "    • codex-nim         -> Launch Codex CLI connected directly to NVIDIA NIM"
+echo "    • aider-nim         -> Launch Aider with Architect mode & NIM diff editing"
+echo "    • nim-update-models -> Audit & sync latest models from NVIDIA NIM catalog"
 
 # Check PATH
 if [[ ":$PATH:" != *":$BIN_DIR:"* ]]; then

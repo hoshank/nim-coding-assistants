@@ -56,6 +56,7 @@ Options:
   --stop               Stop the background proxy
   --logs               View recent logs from the proxy
   --list-models        List popular supported NVIDIA NIM models
+  --update-models      Audit and update latest active models from NVIDIA NIM
   --help, -h           Show this help message
 
 Permission Behavior:
@@ -67,8 +68,7 @@ All other arguments are passed directly to `claude`.
 Supported Tested Models:
   - nvidia/nemotron-3-ultra-550b-a55b (Recommended default)
   - nvidia/nemotron-3-super-120b-a12b
-  - deepseek-ai/deepseek-v4-pro-0813
-  - deepseek-ai/deepseek-v4-flash-0731
+  - deepseek-ai/deepseek-v4.1-flash
   - minimaxai/minimax-m3
   - thinkingmachines/inkling
   - moonshotai/kimi-k3
@@ -197,6 +197,10 @@ while [[ $# -gt 0 ]]; do
       fi
       exit 0
       ;;
+    --update-models)
+      "$SCRIPT_DIR/scripts/mac-linux/update-models.sh" --sync
+      exit 0
+      ;;
     --list-models)
       if [ -f "$SCRIPT_DIR/config/models.json" ]; then
         "$PYTHON_BIN" -c '
@@ -209,8 +213,7 @@ for m in data.get("models", []):
       else
         echo "  - nvidia/nemotron-3-ultra-550b-a55b (Recommended)"
         echo "  - nvidia/nemotron-3-super-120b-a12b"
-        echo "  - deepseek-ai/deepseek-v4-pro-0813"
-        echo "  - deepseek-ai/deepseek-v4-flash-0731"
+        echo "  - deepseek-ai/deepseek-v4.1-flash"
       fi
       exit 0
       ;;

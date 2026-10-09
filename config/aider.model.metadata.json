@@ -71,7 +71,7 @@
     "litellm_provider": "nvidia_nim",
     "mode": "chat"
   },
-  "openai/deepseek-ai/deepseek-v4-flash-0731": {
+  "openai/deepseek-ai/deepseek-v4.1-flash": {
     "max_tokens": 32768,
     "max_input_tokens": 1048576,
     "max_output_tokens": 32768,
@@ -80,7 +80,7 @@
     "litellm_provider": "openai",
     "mode": "chat"
   },
-  "nvidia_nim/deepseek-ai/deepseek-v4-flash-0731": {
+  "nvidia_nim/deepseek-ai/deepseek-v4.1-flash": {
     "max_tokens": 32768,
     "max_input_tokens": 1048576,
     "max_output_tokens": 32768,
@@ -107,7 +107,7 @@
     "litellm_provider": "nvidia_nim",
     "mode": "chat"
   },
-  "openai/z-ai/glm-5.2": {
+  "openai/z-ai/glm-5.3-flash": {
     "max_tokens": 32768,
     "max_input_tokens": 1048576,
     "max_output_tokens": 32768,
@@ -116,7 +116,7 @@
     "litellm_provider": "openai",
     "mode": "chat"
   },
-  "nvidia_nim/z-ai/glm-5.2": {
+  "nvidia_nim/z-ai/glm-5.3-flash": {
     "max_tokens": 32768,
     "max_input_tokens": 1048576,
     "max_output_tokens": 32768,
@@ -153,6 +153,186 @@
     "mode": "chat"
   },
   "nvidia_nim/moonshotai/kimi-k3": {
+    "max_tokens": 32768,
+    "max_input_tokens": 1048576,
+    "max_output_tokens": 32768,
+    "input_cost_per_token": 0.0,
+    "output_cost_per_token": 0.0,
+    "litellm_provider": "nvidia_nim",
+    "mode": "chat"
+  },
+  "openai/deepseek-ai/deepseek-coder-6.7b-instruct": {
+    "max_tokens": 4096,
+    "max_input_tokens": 16384,
+    "max_output_tokens": 4096,
+    "input_cost_per_token": 0.0,
+    "output_cost_per_token": 0.0,
+    "litellm_provider": "openai",
+    "mode": "chat"
+  },
+  "nvidia_nim/deepseek-ai/deepseek-coder-6.7b-instruct": {
+    "max_tokens": 4096,
+    "max_input_tokens": 16384,
+    "max_output_tokens": 4096,
+    "input_cost_per_token": 0.0,
+    "output_cost_per_token": 0.0,
+    "litellm_provider": "nvidia_nim",
+    "mode": "chat"
+  },
+  "openai/meta/llama-3.2-11b-vision-instruct": {
+    "max_tokens": 8192,
+    "max_input_tokens": 131072,
+    "max_output_tokens": 8192,
+    "input_cost_per_token": 0.0,
+    "output_cost_per_token": 0.0,
+    "litellm_provider": "openai",
+    "mode": "chat"
+  },
+  "nvidia_nim/meta/llama-3.2-11b-vision-instruct": {
+    "max_tokens": 8192,
+    "max_input_tokens": 131072,
+    "max_output_tokens": 8192,
+    "input_cost_per_token": 0.0,
+    "output_cost_per_token": 0.0,
+    "litellm_provider": "nvidia_nim",
+    "mode": "chat"
+  },
+  "openai/meta/llama-3.2-90b-vision-instruct": {
+    "max_tokens": 8192,
+    "max_input_tokens": 131072,
+    "max_output_tokens": 8192,
+    "input_cost_per_token": 0.0,
+    "output_cost_per_token": 0.0,
+    "litellm_provider": "openai",
+    "mode": "chat"
+  },
+  "nvidia_nim/meta/llama-3.2-90b-vision-instruct": {
+    "max_tokens": 8192,
+    "max_input_tokens": 131072,
+    "max_output_tokens": 8192,
+    "input_cost_per_token": 0.0,
+    "output_cost_per_token": 0.0,
+    "litellm_provider": "nvidia_nim",
+    "mode": "chat"
+  },
+  "openai/mistralai/codestral-22b-instruct-v0.1": {
+    "max_tokens": 8192,
+    "max_input_tokens": 32768,
+    "max_output_tokens": 8192,
+    "input_cost_per_token": 0.0,
+    "output_cost_per_token": 0.0,
+    "litellm_provider": "openai",
+    "mode": "chat"
+  },
+  "nvidia_nim/mistralai/codestral-22b-instruct-v0.1": {
+    "max_tokens": 8192,
+    "max_input_tokens": 32768,
+    "max_output_tokens": 8192,
+    "input_cost_per_token": 0.0,
+    "output_cost_per_token": 0.0,
+    "litellm_provider": "nvidia_nim",
+    "mode": "chat"
+  },
+  "openai/mistralai/mistral-large-2-instruct": {
+    "max_tokens": 16384,
+    "max_input_tokens": 128000,
+    "max_output_tokens": 16384,
+    "input_cost_per_token": 0.0,
+    "output_cost_per_token": 0.0,
+    "litellm_provider": "openai",
+    "mode": "chat"
+  },
+  "nvidia_nim/mistralai/mistral-large-2-instruct": {
+    "max_tokens": 16384,
+    "max_input_tokens": 128000,
+    "max_output_tokens": 16384,
+    "input_cost_per_token": 0.0,
+    "output_cost_per_token": 0.0,
+    "litellm_provider": "nvidia_nim",
+    "mode": "chat"
+  },
+  "openai/moonshotai/kimi-k2.6": {
+    "max_tokens": 32768,
+    "max_input_tokens": 1048576,
+    "max_output_tokens": 32768,
+    "input_cost_per_token": 0.0,
+    "output_cost_per_token": 0.0,
+    "litellm_provider": "openai",
+    "mode": "chat"
+  },
+  "nvidia_nim/moonshotai/kimi-k2.6": {
+    "max_tokens": 32768,
+    "max_input_tokens": 1048576,
+    "max_output_tokens": 32768,
+    "input_cost_per_token": 0.0,
+    "output_cost_per_token": 0.0,
+    "litellm_provider": "nvidia_nim",
+    "mode": "chat"
+  },
+  "openai/nvidia/nemotron-3-nano-omni-30b-a3b-reasoning": {
+    "max_tokens": 32768,
+    "max_input_tokens": 1048576,
+    "max_output_tokens": 32768,
+    "input_cost_per_token": 0.0,
+    "output_cost_per_token": 0.0,
+    "litellm_provider": "openai",
+    "mode": "chat"
+  },
+  "nvidia_nim/nvidia/nemotron-3-nano-omni-30b-a3b-reasoning": {
+    "max_tokens": 32768,
+    "max_input_tokens": 1048576,
+    "max_output_tokens": 32768,
+    "input_cost_per_token": 0.0,
+    "output_cost_per_token": 0.0,
+    "litellm_provider": "nvidia_nim",
+    "mode": "chat"
+  },
+  "openai/nvidia/nemotron-4-340b-instruct": {
+    "max_tokens": 4096,
+    "max_input_tokens": 131072,
+    "max_output_tokens": 4096,
+    "input_cost_per_token": 0.0,
+    "output_cost_per_token": 0.0,
+    "litellm_provider": "openai",
+    "mode": "chat"
+  },
+  "nvidia_nim/nvidia/nemotron-4-340b-instruct": {
+    "max_tokens": 4096,
+    "max_input_tokens": 131072,
+    "max_output_tokens": 4096,
+    "input_cost_per_token": 0.0,
+    "output_cost_per_token": 0.0,
+    "litellm_provider": "nvidia_nim",
+    "mode": "chat"
+  },
+  "openai/openai/gpt-oss-20b": {
+    "max_tokens": 16384,
+    "max_input_tokens": 131072,
+    "max_output_tokens": 16384,
+    "input_cost_per_token": 0.0,
+    "output_cost_per_token": 0.0,
+    "litellm_provider": "openai",
+    "mode": "chat"
+  },
+  "nvidia_nim/openai/gpt-oss-20b": {
+    "max_tokens": 16384,
+    "max_input_tokens": 131072,
+    "max_output_tokens": 16384,
+    "input_cost_per_token": 0.0,
+    "output_cost_per_token": 0.0,
+    "litellm_provider": "nvidia_nim",
+    "mode": "chat"
+  },
+  "openai/z-ai/glm-5.3": {
+    "max_tokens": 32768,
+    "max_input_tokens": 1048576,
+    "max_output_tokens": 32768,
+    "input_cost_per_token": 0.0,
+    "output_cost_per_token": 0.0,
+    "litellm_provider": "openai",
+    "mode": "chat"
+  },
+  "nvidia_nim/z-ai/glm-5.3": {
     "max_tokens": 32768,
     "max_input_tokens": 1048576,
     "max_output_tokens": 32768,

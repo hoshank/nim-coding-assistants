@@ -187,15 +187,37 @@ def interactive_select(title: str, subtitle: str, options: List[Tuple[str, str]]
     return current_index
 
 def load_models_from_config() -> List[Tuple[str, str]]:
-    """Load model list with clean, concise descriptions."""
+    """Load model list from config/models.json if available, otherwise fallback."""
+    config_paths = [
+        Path.cwd() / "config" / "models.json",
+        Path(__file__).parent.parent / "config" / "models.json",
+        Path.home() / ".nim-coding-assistants" / "config" / "models.json",
+    ]
+    for cp in config_paths:
+        if cp.exists():
+            try:
+                with open(cp, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                    models = []
+                    for m in data.get("models", []):
+                        mid = m["id"]
+                        name = m.get("name", mid)
+                        rec = m.get("recommended_for", "")
+                        if " - " in rec:
+                            rec = rec.split(" - ", 1)[1]
+                        desc = f"{name} • {rec}" if rec else name
+                        models.append((mid, desc))
+                    if models:
+                        models.append(("[ Enter Custom Model ID ]", "Type any custom NVIDIA NIM model"))
+                        return models
+            except Exception:
+                pass
+
     return [
         ("nvidia/nemotron-3-ultra-550b-a55b", "Nemotron 3 Ultra 550B • Default Flagship"),
         ("nvidia/nemotron-3-super-120b-a12b", "Nemotron 3 Super 120B • Fast Reasoning & Planning"),
-        ("deepseek-ai/deepseek-v4-pro-0813", "DeepSeek V4 Pro (0813) • Coding & Refactoring"),
-        ("deepseek-ai/deepseek-v4-flash-0731", "DeepSeek V4 Flash (0731) • Low-Latency Completions"),
-        ("minimaxai/minimax-m3", "MiniMax M3 • Vision & UI Understanding"),
-        ("z-ai/glm-5.2", "GLM 5.2 • General Coding"),
-        ("thinkingmachines/inkling", "Inkling • Interleaved Reasoning & Vision"),
+        ("deepseek-ai/deepseek-v4.1-flash", "DeepSeek V4.1 Flash • Low-Latency Completions"),
+        ("z-ai/glm-5.3-flash", "GLM 5.3 Flash • General Coding"),
         ("moonshotai/kimi-k3", "Kimi K3 • Long-Horizon Reasoning & Coding"),
         ("[ Enter Custom Model ID ]", "Type any custom NVIDIA NIM model"),
     ]

@@ -36,7 +36,7 @@ graph TD
 
 When you type `aider-nim` without flags in an interactive terminal, it presents a 4-step arrow-key dropdown menu:
 
-1. **Step 1: Select Model** — Choose between Nemotron 3 Ultra 550B (default), Super 120B, DeepSeek v4 Pro, DeepSeek v4 Flash, MiniMax M3, GLM-5.2, or Inkling.
+1. **Step 1: Select Model** — Choose between Nemotron 3 Ultra 550B (default), Super 120B, DeepSeek v4 Pro, DeepSeek v4 Flash, MiniMax M3, GLM 5.3 Flash, or Inkling.
 2. **Step 2: Select Workflow Mode**:
    - **Architect Mode (Recommended)**: Dual-model setup where Nemotron 3 Ultra 550B acts as the architect/planner and Nemotron 3 Super 120B acts as the editor applying surgical SEARCH/REPLACE diffs.
    - **Standard Pair Programming (Diff Format)**: Single model applying diff blocks directly to your code.
@@ -106,7 +106,7 @@ This dual-model workflow dramatically reduces latency, eliminates syntax errors,
 
 To specify a custom editor model:
 ```bash
-aider-nim --architect --model deepseek-ai/deepseek-v4-pro-0813 --editor-model deepseek-ai/deepseek-v4-flash-0731
+aider-nim --architect --model nvidia/nemotron-3-ultra-550b-a55b --editor-model deepseek-ai/deepseek-v4.1-flash
 ```
 
 ---

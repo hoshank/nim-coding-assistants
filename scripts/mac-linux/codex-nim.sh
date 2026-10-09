@@ -59,8 +59,7 @@ All other arguments are passed directly to `codex`.
 Supported Tested Models:
   - nvidia/nemotron-3-ultra-550b-a55b (Recommended default)
   - nvidia/nemotron-3-super-120b-a12b
-  - deepseek-ai/deepseek-v4-pro-0813
-  - deepseek-ai/deepseek-v4-flash-0731
+  - deepseek-ai/deepseek-v4.1-flash
   - minimaxai/minimax-m3
   - thinkingmachines/inkling
   - moonshotai/kimi-k3
@@ -115,6 +114,10 @@ while [[ $# -gt 0 ]]; do
     --url)
       BASE_URL="$2"
       shift 2
+      ;;
+    --update-models)
+      "$SCRIPT_DIR/scripts/mac-linux/update-models.sh" --sync
+      exit 0
       ;;
     *)
       CODEX_ARGS+=("$1")

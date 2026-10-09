@@ -67,7 +67,7 @@ The bridge proxy in `proxy.py` solves this with a custom streaming SSE translato
 ## 🖥️ Interactive TUI Workflow
 
 When you type `claude-nim` without flags in an interactive terminal, it presents a 4-step arrow-key dropdown menu:
-1. **Step 1: Select Model** — Choose between Nemotron 3 Ultra 550B (default), Super 120B, DeepSeek v4 Pro, DeepSeek v4 Flash, MiniMax M3, GLM-5.2, or Inkling.
+1. **Step 1: Select Model** — Choose between Nemotron 3 Ultra 550B (default), Super 120B, DeepSeek V4.1 Flash, MiniMax M3, GLM 5.3 Flash, or Inkling.
 2. **Step 2: Select Profile** — Default (`~/.claude`), Clean Vanilla (`~/.claude-profiles/vanilla`), or Dev (`~/.claude-profiles/dev`).
 3. **Step 3: Select Reasoning Effort** — `medium` (default), `high`, or `low`.
 4. **Step 4: Permissions Mode** — `--dangerously-skip-permissions` (default for seamless coding) or Standard Prompts (`--safe`).

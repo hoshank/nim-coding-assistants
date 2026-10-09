@@ -55,14 +55,40 @@ graph TD
 | :--- | :---: | :---: | :---: | :---: | :--- |
 | **`nvidia/nemotron-3-ultra-550b-a55b`** | NVIDIA | ✅ Yes | ❌ | 1,048,576 | **Recommended Default** — Ultra 550B flagship |
 | `nvidia/nemotron-3-super-120b-a12b` | NVIDIA | ✅ Yes | ❌ | 1,048,576 | High-speed reasoning & agentic planning |
-| `deepseek-ai/deepseek-v4-pro-0813` | DeepSeek | ✅ Yes | ❌ | 1,048,500 | Advanced coding & refactoring |
-| `deepseek-ai/deepseek-v4-flash-0731`| DeepSeek | ✅ Yes | ❌ | 1,048,576 | Low-latency completions |
-| `minimaxai/minimax-m3` | MiniMax | ✅ Yes | ✅ Yes | 524,288 | Multimodal vision & UI tasks |
-| `z-ai/glm-5.2` | Z-AI | ✅ Yes | ❌ | 1,048,576 | General coding and reasoning |
-| `thinkingmachines/inkling` | Thinking Machines | ✅ Yes | ✅ Yes | 131,072 | Interleaved reasoning, vision & tools |
+| `deepseek-ai/deepseek-v4.1-flash`| DeepSeek | ✅ Yes | ❌ | 1,048,576 | Low-latency completions |
+| `z-ai/glm-5.3-flash` | Z-AI | ✅ Yes | ❌ | 1,048,576 | General coding and reasoning |
 | `moonshotai/kimi-k3` | Moonshot AI | ✅ Yes | ✅ Yes | 1,048,576 | Long-horizon reasoning, agentic coding & vision |
+| `meta/llama-3.2-11b-vision-instruct` | Meta | ✅ Yes | ✅ Yes | 131,072 | Multimodal vision & UI tasks |
+| `mistralai/codestral-22b-instruct-v0.1` | Mistral AI | ✅ Yes | ❌ | 32,768 | Dedicated code generation & FIM |
 
-> 💡 *Need to add or modify models later? Check the [Adding Models Guide](docs/ADDING_MODELS.md).*
+> 💡 *Need to check or update models? Run `nim-update-models` anytime!*
+
+---
+
+## 🔄 Keeping Models Updated
+
+NVIDIA continuously updates its NIM catalog and sunsets older model checkpoints (returning HTTP 410 Gone when expired). Use the built-in model updater to audit and sync your models:
+
+```bash
+# Audit configured models for EOL / deprecations
+nim-update-models
+
+# Automatically update models.json and bridge aliases to the latest active models
+nim-update-models --sync
+
+# Test connectivity and latency for a specific model
+nim-update-models --test deepseek-ai/deepseek-v4.1-flash
+
+# List all 80+ models available in the NVIDIA NIM catalog
+nim-update-models --list-all
+```
+
+You can also run `--update-models` with any assistant CLI:
+```bash
+claude-nim --update-models
+codex-nim --update-models
+aider-nim --update-models
+```
 
 ---
 
@@ -250,7 +276,7 @@ aider-nim --model nvidia/nemotron-3-super-120b-a12b
 aider-nim -m deepseek-ai/deepseek-v4-pro-0813
 
 # 5. Combined Architect + Custom Editor + Effort
-aider-nim -A -m deepseek-ai/deepseek-v4-pro-0813 --editor-model deepseek-ai/deepseek-v4-flash-0731 -e high
+aider-nim -A -m nvidia/nemotron-3-ultra-550b-a55b --editor-model deepseek-ai/deepseek-v4.1-flash -e high
 
 # 6. Git commit behavior
 aider-nim --no-auto-commits     # Keep edits unstaged for manual review

@@ -90,14 +90,14 @@
     - reasoning_effort
 
 # ------------------------------------------------------------------------------
-# DeepSeek V4 Flash 0731 (Low-Latency Completions)
+# DeepSeek V4.1 Flash (Low-Latency Completions)
 # ------------------------------------------------------------------------------
-- name: openai/deepseek-ai/deepseek-v4-flash-0731
+- name: openai/deepseek-ai/deepseek-v4.1-flash
   edit_format: diff
   use_repo_map: true
   streaming: true
 
-- name: nvidia_nim/deepseek-ai/deepseek-v4-flash-0731
+- name: nvidia_nim/deepseek-ai/deepseek-v4.1-flash
   edit_format: diff
   use_repo_map: true
   streaming: true
@@ -116,14 +116,14 @@
   streaming: true
 
 # ------------------------------------------------------------------------------
-# Z-AI GLM 5.2 (General Coding & Reasoning)
+# Z-AI GLM 5.3 Flash (General Coding & Reasoning)
 # ------------------------------------------------------------------------------
-- name: openai/z-ai/glm-5.2
+- name: openai/z-ai/glm-5.3-flash
   edit_format: diff
   use_repo_map: true
   streaming: true
 
-- name: nvidia_nim/z-ai/glm-5.2
+- name: nvidia_nim/z-ai/glm-5.3-flash
   edit_format: diff
   use_repo_map: true
   streaming: true
